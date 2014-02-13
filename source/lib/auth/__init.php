@@ -111,7 +111,7 @@ class authentication {
         if (is_null($session->getVar('UUID'))) {
             if (!is_null($common->getParam('UUID'))) {
                 $session->addVar('UUID', $common->getParam('UUID'));
-                $tbl = array('d'=>'tbl_devices');
+                $tbl = array('d'=>'tbl_device');
                 $joins = array();
                 $cols = array(
                     'd'=>array('id', 'name', 'last_sync')
