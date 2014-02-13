@@ -1,0 +1,91 @@
+/* 
+    Document   : styles
+    Created on : 11-Feb-2014, 23:25:39
+    Author     : richard
+    Description:
+        Bar Web Portal
+*/
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 0.7em;
+    margin: 0;
+    padding: 0;
+}
+#head {
+    height: 95px;
+    background: #000000;
+    color: #ffffff;
+}
+#head h1 {
+    font-size: 3em;
+    float: left;
+    margin: 27px 55px;
+    font-weight: normal;
+}
+#head ul {
+    float: right;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin: 27px 55px;
+}
+#head ul li {
+    font-size: 1.6em;
+    display: inline;
+    margin: 0 15px;
+    margin: 0 0;
+    padding: 0 15px;
+    border-left: 1px solid #ffffff;
+}
+#head ul li.first {
+    padding: 15px;
+    border: none;
+}
+#head ul li a {
+    color: #ffffff;
+    text-decoration: none;
+}
+#login_box {
+    width: 400px;
+    height: 225px;
+    margin: 10% auto;
+    padding: 20px;
+    border: 2px solid #b6b6b6;
+    border-radius: 2px;
+}
+#confpassword, #username, #password {
+    padding: 2px 4px 0;
+    margin: 0 0 30px;
+    width: 388px;
+    height: 33px;
+    background: #eeeeee;
+    font-family: Arial, sans-serif;
+    font-size: 1.3em;
+    border: 1px solid #aaaaaa;
+}
+#login_btn {
+    background: #000000;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.3em;
+    cursor: pointer;
+    width: 205px;
+    height: 35px;
+}
+#footer {
+    background: #666666;
+    height: 15px;
+    color: #ffffff;
+    padding: 5px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+#footer p {
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+}
