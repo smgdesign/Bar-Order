@@ -7,26 +7,52 @@ class ApiController extends Controller {
     public function __init() {
         global $auth, $common, $db;
         $device = $auth->checkDevice();
-        if (!$this->checkContinue()) return;
-        if (is_array($device)) {
-            if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override') === true) {
-                if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== false) || $common->getParam('override') === true) {
-                    $data = array();
-                    $data['venues'] = $this->venue('list');
-                    $data['locations'] = $this->location('list');
-                    $data['tables'] = $this->table('list');
-                    $data['menu'] = $this->menu('list');
-                    $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$data);
-                    $db->dbQuery("UPDATE tbl_device SET last_sync=NOW() WHERE id={$device['device_id']}");
+        $qr = $this->registerQR();
+        if ($qr) {
+            if (!$this->checkContinue()) return;
+            if (is_array($device)) {
+                if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override') === true) {
+                    if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== false) || $common->getParam('override') === true) {
+                        $data = array();
+                        $data['venues'] = $this->venue('list');
+                        $data['locations'] = $this->location('list');
+                        $data['tables'] = $this->table('list');
+                        $data['menu'] = $this->menu('list');
+                        $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$data);
+                        $db->dbQuery("UPDATE tbl_device SET last_sync=NOW() WHERE id={$device['device_id']}");
+                    } else {
+                        $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'sync'=>'required');
+                    }
                 } else {
-                    $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'sync'=>'required');
+                    $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'sync'=>'not_required');
                 }
             } else {
                 $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'sync'=>'not_required');
             }
         } else {
-            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'sync'=>'not_required');
+            $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'The QR code data string is required in format venueID:locationID:tableID - for testing purposes, this should be 1:2:1');
         }
+    }
+    
+    public function registerQR() {
+        global $common;
+        if (!is_null($common->getParam('QR'))) {
+            $qr = $common->getParam('QR');
+            $info = explode(':', $qr);
+            if (!is_null($info)) {
+                // our QR code will contain venueID:locationID:tableID \\
+                if (count($info) == 3) {
+                    $venue = (int)$info[0];
+                    $location = (int)$info[1];
+                    $table = (int)$info[2];
+                    $this->venue('set', $venue);
+                    $this->location('set', $location);
+                    $this->table('set', $table);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     public function venue($action='list', $id=0) {
@@ -57,7 +83,7 @@ class ApiController extends Controller {
                 }
                 break;
             case "set":
-                if ($id != 0) {
+                if ($id != 0 && is_int($id)) {
                     $session->addVar('venue_id', $id);
                     $this->json = array('status'=>\errors\codes::$__SUCCESS, 'venue_id'=>$session->getVar('venue_id'));
                 } else {
@@ -78,7 +104,16 @@ class ApiController extends Controller {
                 $cols = array(
                     'v'=>array('*')
                 );
-                $cond = array();
+                $cond = array(
+                    'v'=>array(
+                        'join'=>'AND',
+                        array(
+                            'col'=>'parent_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('venue_id')
+                        )
+                    )
+                );
                 $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
                 if ($data[1] > 0) {
                     return array('status'=>  \errors\codes::$__FOUND, 'data'=>$data[0]);
@@ -87,7 +122,7 @@ class ApiController extends Controller {
                 }
                 break;
             case "set":
-                if ($id != 0) {
+                if ($id != 0 && is_int($id)) {
                     $session->addVar('location_id', $id);
                     $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'location_id'=>$id);
                 } else {
@@ -108,7 +143,16 @@ class ApiController extends Controller {
                 $cols = array(
                     't'=>array('*')
                 );
-                $cond = array();
+                $cond = array(
+                    't'=>array(
+                        'join'=>'AND',
+                        array(
+                            'col'=>'location_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('location_id')
+                        )
+                    )
+                );
                 $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
                 if ($data[1] > 0) {
                     return array('status'=>  \errors\codes::$__FOUND, 'data'=>$data[0]);
@@ -117,7 +161,7 @@ class ApiController extends Controller {
                 }
                 break;
             case "set":
-                if ($id != 0) {
+                if ($id != 0 && is_int($id)) {
                     $session->addVar('table_id', $id);
                     $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'table_id'=>$id);
                 } else {
@@ -142,7 +186,21 @@ class ApiController extends Controller {
                     'm'=>array('*'),
                     'i'=>array('id AS ingredient_id', 'title AS ingredient', 'desc AS ingredient_desc')
                 );
-                $cond = array();
+                $cond = array(
+                    'm'=>array(
+                        'join'=>'OR',
+                        array(
+                            'col'=>'location_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('venue_id')
+                        ),
+                        array(
+                            'col'=>'location_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('location_id')
+                        )
+                    )
+                );
                 $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
                 $menu = array();
                 if ($data[1] > 0) {
