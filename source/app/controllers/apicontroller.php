@@ -223,7 +223,7 @@ class ApiController extends Controller {
                         $menu[$cat['menu_id']]['categories'][] = $cat;
                     }
                 }
-                $locations = array();
+                /*$locations = array();
                 foreach ($menu as $id=>$item) {
                     if (!isset($locations[$item['location_id']])) {
                         $locations[$item['location_id']] = array();
@@ -232,6 +232,11 @@ class ApiController extends Controller {
                 }
                 if (!empty($locations)) {
                     return array('status'=>  \errors\codes::$__FOUND, 'data'=>$locations, 'description'=>'The data object is grouped by the location ID that each menu item belongs to');
+                } else {
+                    return array('status'=>  \errors\codes::$__EMPTY);
+                }*/
+                if (!empty($menu)) {
+                    return array('status'=>  \errors\codes::$__FOUND, 'data'=>$menu);
                 } else {
                     return array('status'=>  \errors\codes::$__EMPTY);
                 }

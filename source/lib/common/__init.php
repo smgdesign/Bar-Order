@@ -37,15 +37,14 @@ class common {
         return $output;
     }
     
-    public function curlPOSTRequest($url, $data) {
-        global $session;
+    public function curlPOSTRequest($url, $data, $type='pairs') {
         set_time_limit(60);
         $output = array();
         $curlSession = curl_init();
         curl_setopt($curlSession, CURLOPT_URL, $url);
         curl_setopt($curlSession, CURLOPT_HEADER, 0);
         curl_setopt($curlSession, CURLOPT_POST, 1);
-        curl_setopt($curlSession, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($curlSession, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($curlSession, CURLOPT_RETURNTRANSFER,1); 
         curl_setopt($curlSession, CURLOPT_TIMEOUT,30); 
 
@@ -53,27 +52,106 @@ class common {
         curl_setopt($curlSession, CURLOPT_SSL_VERIFYHOST, 1);
 
         $rawresponse = curl_exec($curlSession);
-        //Store the raw response for later as it's useful to see for integration and understanding 
-        $session->addVar('rawresponse', $rawresponse);
-        //Split response into name=value pairs
-        $response = split(chr(10), $rawresponse);
-        // Check that a connection was made
-        if (curl_error($curlSession)){
-        // If it wasn't...
-                $output['Status'] = "FAIL";
-                $output['StatusDetail'] = curl_error($curlSession);
+        $info = curl_getinfo($curlSession);
+        switch ($type) {
+            case 'json':
+                $output = new stdClass();
+                $output->status = "Success";
+                if (curl_error($curlSession)){
+                    $output->status = "Error";
+                    $output->statusMsg = curl_error($curlSession);
+                } else {
+                    $output = json_decode($rawresponse);
+                }
+                break;
+            case 'pairs':
+                //Split response into name=value pairs
+                $response = explode(' ', $rawresponse);
+                // Check that a connection was made
+                if (curl_error($curlSession)){
+                    // If it wasn't...
+                    $output['Status'] = "FAIL";
+                    $output['StatusDetail'] = curl_error($curlSession);
+                }
+
+                // Tokenise the response
+                for ($i=0; $i<count($response); $i++){
+                    // Find position of first "=" character
+                    $splitAt = strpos($response[$i], "=");
+                    // Create an associative (hash) array with key/value pairs ('trim' strips excess whitespace)
+                    $output[trim(substr($response[$i], 0, $splitAt))] = trim(substr($response[$i], ($splitAt+1)));
+                }
+                break;
+            default:
+                $output = $rawresponse;
+                break;
         }
 
         // Close the cURL session
         curl_close ($curlSession);
 
-        // Tokenise the response
-        for ($i=0; $i<count($response); $i++){
-                // Find position of first "=" character
-                $splitAt = strpos($response[$i], "=");
-                // Create an associative (hash) array with key/value pairs ('trim' strips excess whitespace)
-                $output[trim(substr($response[$i], 0, $splitAt))] = trim(substr($response[$i], ($splitAt+1)));
-        } // END for ($i=0; $i<count($response); $i++)
+
+        // Return the output
+        return $output;
+    }
+    
+    public function curlGETRequest($url, $data, $type='json') {
+        set_time_limit(60);
+        $output = array();
+        $curlSession = curl_init();
+        $query = http_build_query($data);
+        curl_setopt($curlSession, CURLOPT_URL, $url.'?'.$query);
+        curl_setopt($curlSession, CURLOPT_HEADER, 0);
+        curl_setopt($curlSession, CURLOPT_RETURNTRANSFER,1); 
+        curl_setopt($curlSession, CURLOPT_TIMEOUT,30); 
+
+        curl_setopt($curlSession, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curlSession, CURLOPT_SSL_VERIFYHOST, 1);
+
+        $rawresponse = curl_exec($curlSession);
+        
+        $info = curl_getinfo($curlSession);
+        if (verbose) {
+            print_r($info);
+            print_r($rawresponse);
+        }
+        switch ($type) {
+            case 'json':
+                $output = new stdClass();
+                $output->status = "Success";
+                if (curl_error($curlSession)){
+                    $output->status = "Error";
+                    $output->statusMsg = curl_error($curlSession);
+                } else {
+                    $output = json_decode($rawresponse);
+                }
+                break;
+            case 'pairs':
+                //Split response into name=value pairs
+                $response = explode(' ', $rawresponse);
+                // Check that a connection was made
+                if (curl_error($curlSession)){
+                    // If it wasn't...
+                    $output['Status'] = "FAIL";
+                    $output['StatusDetail'] = curl_error($curlSession);
+                }
+
+                // Tokenise the response
+                for ($i=0; $i<count($response); $i++){
+                    // Find position of first "=" character
+                    $splitAt = strpos($response[$i], "=");
+                    // Create an associative (hash) array with key/value pairs ('trim' strips excess whitespace)
+                    $output[trim(substr($response[$i], 0, $splitAt))] = trim(substr($response[$i], ($splitAt+1)));
+                }
+                break;
+            default:
+                $output = $rawresponse;
+                break;
+        }
+
+        // Close the cURL session
+        curl_close ($curlSession);
+
 
         // Return the output
         return $output;
