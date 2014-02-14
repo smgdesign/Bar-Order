@@ -12,10 +12,17 @@
 class authentication {
     var $loggedIn = false;
     var $level = 0;
+    var $config = array();
     public function __construct() {
         global $session, $db, $common;
         require_once ROOT . DS . 'lib' . DS . '/enc/__init.php';
         $this->encrypt = new Bcrypt();
+        $config = $db->dbResult($db->dbQuery("SELECT name, value FROM tbl_config"));
+        if ($config[1] > 0) {
+            foreach ($config[0] as $conf) {
+                $this->config[$conf['name']] = $conf['value'];
+            }
+        }
         if (!is_null($session->getVar('id')) && $session->getVar('user_agent') == md5($common->getParam('HTTP_USER_AGENT', 'server'))) {
             $cur = new DateTime();
             if ($session->getVar('last_action') < ($cur->getTimestamp() - 30*60)) {
@@ -110,50 +117,19 @@ class authentication {
         $machineName = gethostbyaddr($common->getParam('REMOTE_ADDR', 'server'));
         if (is_null($session->getVar('UUID'))) {
             if (!is_null($common->getParam('UUID'))) {
-                $session->addVar('UUID', $common->getParam('UUID'));
-                $tbl = array('d'=>'tbl_device');
-                $joins = array();
-                $cols = array(
-                    'd'=>array('id', 'name', 'last_sync')
-                );
-                $cond = array(
-                    'd'=>array(
-                        'join'=>'AND',
-                        array(
-                            'col'=>'UUID',
-                            'operand'=>'=',
-                            'value'=>"'{$common->getParam('UUID')}'"
-                        )
-                    )
-                );
-                $device = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
-                if ($device[1] > 0) {
-                    $sync = new DateTime($device[0][0]['last_sync']);
+                $device = $this->getDevice();
+                if (is_array($device)) {
+                    $sync = new DateTime($device['last_sync']);
                     if ($sync !== false) {
                         if (!is_null($common->getParam('sync'))) {
-                            $tbl = array('c'=>'tbl_config');
-                            $joins = array();
-                            $cols = array(
-                                'c'=>array('value')
-                            );
-                            $cond = array(
-                                'c'=>array(
-                                    'join'=>'AND',
-                                    array(
-                                        'col'=>'name',
-                                        'operand'=>'=',
-                                        'value'=>"'last_updated'"
-                                    )
-                                )
-                            );
-                            $dbsync = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
-                            if ($dbsync[1] > 0) {
-                                $last = new DateTime($dbsync[0][0]['value']);
+                            $dbconf = $this->config;
+                            if (isset($dbconf['last_updated'])) {
+                                $last = new DateTime($dbconf['last_updated']);
                                 if ($last > $sync) {
                                     // means we need to resync \\
-                                    return array('status'=>'exists', 'sync'=>true, 'device_id'=>$device[0][0]['id']);
+                                    return array('status'=>'exists', 'sync'=>true, 'device_id'=>$device['id']);
                                 } else {
-                                    return array('status'=>'exists', 'sync'=>false, 'device_id'=>$device[0][0]['id']);
+                                    return array('status'=>'exists', 'sync'=>false, 'device_id'=>$device['id']);
                                 }
                             } else {
                                 // now insert this in the db \\
@@ -187,11 +163,12 @@ class authentication {
         }
         if (!is_null($common->getParam('UUID'))) {
             $UUID = $common->getParam('UUID');
+            
         }
         if (isset($UUID)) {
-            $id = $db->dbResult($db->dbQuery("SELECT id FROM tbl_device WHERE UUID='$UUID'"));
+            $id = $db->dbResult($db->dbQuery("SELECT id, name, last_sync FROM tbl_device WHERE UUID='$UUID'"));
             if ($id[1] > 0) {
-                return $id[0][0]['id'];
+                return $id[0][0];
             }
         }
         return false;

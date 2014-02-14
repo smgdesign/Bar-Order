@@ -30,11 +30,11 @@ class Controller {
     }
     
     function checkContinue() {
-        global $session;
-        if ($this->level > 0 && is_null($session->getVar('id')) && (is_null($session->getVar('level')) || $session->getVar('level') < $this->level)) {
-            return false;
+        global $auth, $common;
+        if (!is_null($common->getParam('api_key')) && isset($auth->config['api_key']) && $auth->config['api_key'] == $common->getParam('api_key')) {
+            return true;
         }
-        return true;
+        return false;
     }
     
     function checkWebContinue() {

@@ -52,7 +52,10 @@ class common {
         curl_setopt($curlSession, CURLOPT_SSL_VERIFYHOST, 1);
 
         $rawresponse = curl_exec($curlSession);
-        $info = curl_getinfo($curlSession);
+        if (verbose) {
+            $info = curl_getinfo($curlSession);
+            print_r($info);
+        }
         switch ($type) {
             case 'json':
                 $output = new stdClass();

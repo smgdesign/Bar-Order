@@ -49,7 +49,7 @@ class collection {
                                             $val = '';
                                             if (is_array($condit['value'])) {
                                                 $val = "'".implode("','", $condit['value'])."'";
-                                                $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' ('.$condit['value'].')';
+                                                $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' ('.$val.')';
                                             } else {
                                                 $err[] = $ref.'.'.$condit['col'].' IN requires an array';
                                             }

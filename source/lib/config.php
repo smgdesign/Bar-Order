@@ -14,6 +14,7 @@ require_once ROOT . DS . 'lib' . DS . 'codes.php';
 
 define('debug', 'develop');
 define('uploadDir', $_SERVER['DOCUMENT_ROOT'].'/public/files/');
+define('verbose', false);
 //define('adminEmail', 'paul.goddard@reckittbenckiser.com');
 $confArray = array();
 $confArray['db'] = array();
