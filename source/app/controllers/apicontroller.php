@@ -353,4 +353,37 @@ class ApiController extends Controller {
             $this->json = array('status'=>  \errors\codes::$__ERROR);
         }
     }
+    public function change_status($mode='order') {
+        global $common;
+        switch ($mode) {
+            case "order":
+                if (!is_null($common->getParam('id')) && !is_null($common->getParam('status'))) {
+                    $data = array(
+                        'tbl_order'=>array(
+                            'fields'=>array(
+                                'status'=>$common->getParam('status')
+                            ),
+                            'mode'=>'update',
+                            'where'=>array('id'=>$common->getParam('id'))
+                        ),
+                        'response'=>array(
+                            'tbl_order'=>array('id'=>$common->getParam('id'))
+                        )
+                    );
+                    $update = \data\collection::buildQuery("INSERT", $data);
+                    if ($update['success']) {
+                        $this->json = array('status'=>  \errors\codes::$__SUCCESS);
+                    } else {
+                        $this->json = array('status'=>  \errors\codes::$__ERROR);
+                    }
+                } else {
+                    $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'id and status are required');
+                }
+                break;
+            case "item":
+                
+                break;
+        }
+        
+    }
 }

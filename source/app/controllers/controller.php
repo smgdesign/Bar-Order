@@ -20,7 +20,7 @@ class Controller {
         $this->_model = $model;
  
         $this->$model = new $model;
-        $this->_template = new Template($controller,$action);
+        $this->_template = new Template($controller,$action, $model);
         $this->_template->$model = $this->$model;
         $common->isPage = false;
     }

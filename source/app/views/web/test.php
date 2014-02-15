@@ -5,7 +5,7 @@ $tables = '';
 $menu = '';
 $orders = array();
 $tableID = 0;
-if (isset($data) && !empty($data)) {
+if (isset($data) && !empty($data) && !isset($data->sync)) {
     if ($data->status->code == 4) {
         foreach ($data->data as $item=>$section) {
             if ($section->status->code == 3) {

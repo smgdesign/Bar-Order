@@ -4,15 +4,17 @@
  * Bar App - 2014
  */
 class Template {
-     
+    var $statuses = array('Order Placed', 'In Progress', 'Serving', 'Completed', 'Problem with Order');
     protected $variables = array();
     protected $_controller;
     protected $_action;
+    protected $_model;
     var $headIncludes = array();
     var $xhr = true;
-    function __construct($controller,$action) {
+    function __construct($controller,$action, $model) {
         $this->_controller = $controller;
         $this->_action = $action;
+        $this->_model = $model;
     }
  
     /** Set Variables **/
@@ -42,5 +44,24 @@ class Template {
                 include (ROOT . DS . 'app' . DS . 'views' . DS . 'footer.php');
             }
         }
+    }
+    
+    public function orderStatus($status) {
+        if (isset($this->statuses[$status])) {
+            return $this->statuses[$status];
+        }
+        return $this->statuses[0];
+    }
+    public function orderStatuses() {
+        return $this->statuses;
+    }
+    public function selectList($list=array(), $sel='') {
+        $output = '';
+        if (!empty($list)) {
+            foreach ($list as $val=>$item) {
+                $output .= '<option value="'.$val.'" '.(($val == $sel) ? 'selected="selected"' : '').'>'.$item.'</option>';
+            }
+        }
+        return $output;
     }
 }

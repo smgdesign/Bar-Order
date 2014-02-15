@@ -28,7 +28,7 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
-    margin: 27px 55px;
+    margin: 27px 55px 27px 0;
 }
 #head ul li {
     font-size: 1.6em;
@@ -88,4 +88,190 @@ body {
     padding: 0;
     margin: 0;
     font-size: 1em;
+}
+.order_list {
+    width: 100%;
+    border-collapse: collapse;
+}
+.order_list thead {
+    background: #cccccc;
+    font-size: 1.3em;
+}
+.order_list, .order_list th, .order_list td {
+    border: 1px solid #b6b6b6;
+}
+.order_list td {
+    padding: 24px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #444444;
+}
+.order_list tr.status_0 {
+    background: #ffefbf;
+}
+.order_list tr.status_1 {
+    background: #fbdec0;
+}
+.order_list tr.status_2 {
+    background: #f3fbc1;
+}
+.order_list tr.status_3 {
+    background: #cdf8c0;
+}
+.order_list tr.status_4 {
+    background: #8c0000;
+}
+.order_list tr td, .order_list tr td select {
+    color: #444444;
+}
+.order_list tr.status_4 td {
+    color: #ffffff;
+}
+.order_list tr td select {
+    color: #444444;
+    background: url(/img/select_down.png) no-repeat right top;
+}
+.order_list tr.status_4 td select {
+    color: #ffffff;
+    background-position: right bottom;
+}
+.order_list td.order_id {
+    background: #ffffff;
+    color: #444444;
+}
+.order_list td select {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1em;
+    background: none;
+    border: none;
+    -webkit-appearance: none;
+    width: 100%;
+    padding-right: 20px;
+}
+a.view_order_btn {
+    background: #444444;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 14px;
+    text-decoration: none;
+}
+
+.modalContainer                     {z-index: 3000; position:absolute; top:0; left:0;}
+.modalPopup                         {position: absolute; background:#ffffff; padding:20px 0; border:2px solid #cccccc;}
+.tooltipClose,
+.modalClose                         {position: absolute; top:-22px; right:-22px; width:40px; height:40px; background: url(/img/close.png) no-repeat center; cursor:pointer; z-index: 3001;}
+.modalContent                       {overflow: auto; }
+.loader_centre {width: 256px; margin: 40px auto;}
+
+.large_text {text-align: center; font-size: 1.6em;}
+.error {color: #8c0000;}
+
+/* modal window */
+.order_info {
+    font-size: 1.4em;
+    width: 100%;
+}
+.order_info th {
+    text-align: left;
+}
+.order_info .order_instruction {
+    font-family: Arial, sans-serif;
+    font-size: 1em;
+    width: 100%;
+    border: 1px solid #cccccc;
+}
+
+
+.order_items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.4em;
+}
+.order_items thead {
+    background: #cccccc;
+}
+.order_items tr.row_odd {
+    background: #ffffff;
+}
+.order_items tr.row_even {
+    background: #eeeeee;
+}
+.order_items th, .order_items td {
+    border-right: 1px solid #999999;
+}
+.order_items th:last-child, .order_items tr td:last-child {
+    border: none;
+}
+.order_items .edit_btn {
+    text-align: center;
+    background: #444444;
+    border-radius: 4px;
+    padding: 8px 35px;
+    color: #ffffff;
+    text-decoration: none;
+}
+.order_items .save_btn {
+    background-color: #30883b;
+    padding: 8px 31px;
+}
+/* loader */
+#movingBallG{
+    position:relative;
+    width:256px;
+    height:20px;
+}
+
+.movingBallLineG{
+    position:absolute;
+    left:0px;
+    top:8px;
+    height:4px;
+    width:256px;
+    background-color:#dddddd;
+}
+
+.movingBallG{
+    background-color:#444444;
+    position:absolute;
+    top:0;
+    left:0;
+    width:20px;
+    height:20px;
+    -webkit-border-radius:10px;
+    -webkit-animation-name:bounce_movingBallG;
+    -webkit-animation-duration:1.4s;
+    -webkit-animation-iteration-count:infinite;
+    -webkit-animation-direction:linear;
+    border-radius:10px;
+    animation-name:bounce_movingBallG;
+    animation-duration:1.4s;
+    animation-iteration-count:infinite;
+    animation-direction:linear;
+}
+
+@-webkit-keyframes bounce_movingBallG{
+    0%{
+        left:0px;
+    }
+
+    50%{
+        left:236px;
+    }
+
+    100%{
+        left:0px;
+    }
+}
+
+@keyframes bounce_movingBallG{
+    0%{
+        left:0px;
+    }
+    50%{
+        left:236px;
+    }
+    100%{
+        left:0px;
+    }
 }

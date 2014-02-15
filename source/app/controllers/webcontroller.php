@@ -13,6 +13,8 @@ class WebController extends Controller {
     }
     public function index() {
         $this->level = 1;
+        $this->_template->headIncludes[] = '<script type="text/javascript" src="/js/modal.popup.js"></script>';
+        $this->_template->headIncludes[] = '<script type="text/javascript" src="/js/order.list.functions.js"></script>';
         if (!$this->checkWebContinue()) return;
         $this->set('title', 'Web Portal');
         $this->set('orders', $this->Web->orders('list'));
@@ -44,6 +46,15 @@ class WebController extends Controller {
                 'test'
             );
             $this->set('order', $place);
+        }
+    }
+    public function view($id='') {
+        global $common;
+        $this->_template->xhr = true;
+        if (!empty($id)) {
+            $this->set('order', $this->Web->orders('get', $id));
+        } else {
+            $this->set('error', 'You must specify an order');
         }
     }
 }
