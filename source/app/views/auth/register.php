@@ -3,6 +3,15 @@
 if (isset($locationID)) {
 ?>
 <div id="login_box">
+    <?php
+    if (isset($errors)) {
+        foreach ($errors as $err) {
+            ?>
+    <p class="error"><?php echo $err; ?></p>
+    <?php
+        }
+    }
+    ?>
     <form action="/auth/register" method="post">
         <input type="text" name="username" id="username" placeholder="Username" />
         <br />
@@ -15,6 +24,10 @@ if (isset($locationID)) {
         <input type="submit" name="register" value="Register" id="login_btn" />
     </form>
 </div>
+<?php
+} else {
+    ?>
+<p class="error">You have reached this page in error</p>
 <?php
 }
 ?>

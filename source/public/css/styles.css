@@ -46,15 +46,14 @@ body {
     color: #ffffff;
     text-decoration: none;
 }
-#login_box {
+#login_box, #form_box {
     width: 400px;
-    height: 225px;
     margin: 10% auto;
     padding: 20px;
     border: 2px solid #b6b6b6;
     border-radius: 2px;
 }
-#confpassword, #username, #password {
+#confpassword, #username, #password, input[type='text'] {
     padding: 2px 4px 0;
     margin: 0 0 30px;
     width: 388px;
@@ -64,7 +63,28 @@ body {
     font-size: 1.3em;
     border: 1px solid #aaaaaa;
 }
-#login_btn {
+input[type='file'] {
+    padding: 8px 4px 2px;
+    margin: 0 0 30px;
+    width: 388px;
+    height: 25px;
+    background: #eeeeee;
+    font-family: Arial, sans-serif;
+    font-size: 1.3em;
+    border: 1px solid #aaaaaa;
+    color: #aaaaaa;
+}
+#form_box textarea {
+    padding: 2px 4px 0;
+    margin: 0 0 30px;
+    width: 388px;
+    height: 60px;
+    background: #eeeeee;
+    font-family: Arial, sans-serif;
+    font-size: 1.3em;
+    border: 1px solid #aaaaaa;
+}
+#login_btn, #form_btn {
     background: #000000;
     border: none;
     padding: 0;
@@ -167,6 +187,7 @@ a.view_order_btn {
 
 .large_text {text-align: center; font-size: 1.6em;}
 .error {color: #8c0000;}
+.success {color: #22aa22;}
 
 /* modal window */
 .order_info {

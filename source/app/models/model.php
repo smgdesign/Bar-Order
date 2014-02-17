@@ -38,7 +38,8 @@ class Model {
                             )
                         )
                     );
-                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
+                    $order = array('ORDER BY time_ordered DESC');
+                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond, $order);
                     if ($data[1] > 0) {
                         $orders = array();
                         foreach ($data[0] as $item) {
@@ -82,7 +83,8 @@ class Model {
                             )
                         )
                     );
-                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
+                    $order = array('ORDER BY time_ordered DESC');
+                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond, $order);
                     if ($data[1] > 0) {
                         $orders = array();
                         foreach ($data[0] as $item) {

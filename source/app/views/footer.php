@@ -3,6 +3,7 @@
  * SMG Design MVC Template 2014
  */
 ?>
+<p>&nbsp;</p>
 <div id="footer">
     <p>Copyright Bar Order Web Portal <?php echo date('Y'); ?> &hyphen; This is an administrative panel to be used by authorised members of staff only.</p>
 </div>

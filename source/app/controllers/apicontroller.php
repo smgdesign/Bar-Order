@@ -6,13 +6,13 @@
 class ApiController extends Controller {
     public function __init() {
         global $auth, $common, $db;
-        $device = $auth->checkDevice();
         $qr = $this->registerQR();
         if ($qr) {
             if ($this->checkContinue()) {
+                $device = $auth->checkDevice();
                 if (is_array($device)) {
-                    if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override') === true) {
-                        if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== false) || $common->getParam('override') === true) {
+                    if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override')) {
+                        if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== false) || $common->getParam('override')) {
                             $data = array();
                             $data['venues'] = $this->venue('list');
                             $data['locations'] = $this->location('list');
@@ -254,7 +254,7 @@ class ApiController extends Controller {
         }
     }
     public function order($action='list') {
-        global $auth, $db, $common;
+        global $auth, $db, $common, $session;
         if (!$this->checkContinue()) return;
         $device = $auth->getDevice();
         if (is_array($device)) {
@@ -292,26 +292,29 @@ class ApiController extends Controller {
                             if (!isset($orders[$item['id']])) {
                                 $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$item['time_ordered'], 'time_completed'=>$item['time_completed'], 'table'=>$item['name'], 'items'=>array());
                             }
-                            if (!empty($item['menu_id'])) {
-                                $orders[$item['id']]['items'][] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status']);
+                            
+                            if (isset($orders[$item['id']]['items'][$item['menu_id']])) {
+                                $orders[$item['id']]['items'][$item['menu_id']]['qty'] = $orders[$item['id']]['items'][$item['menu_id']]['qty']+1;
+                            } else {
+                                $orders[$item['id']]['items'][$item['menu_id']] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status'], 'qty'=>1);
                             }
                         }
                         if (!empty($orders)) {
                             $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$orders);
                         } else {
-                            $this->json = array('status'=>\errors\codes::$__EMPTY);
+                            $this->json = array('status'=>\errors\codes::$__EMPTY, 'message'=>'Orders were found, but not matching criteria.', 'query'=>array($tbl, $joins, $cols, $cond));
                         }
                     } else {
-                        $this->json = array('status'=>\errors\codes::$__EMPTY);
+                        $this->json = array('status'=>\errors\codes::$__EMPTY, 'message'=>'No orders were found.', 'query'=>array($tbl, $joins, $cols, $cond));
                     }
                     break;
                 case "place":
                     if (!is_null($common->getParam('submitted'))) {
-                        $tableID = $common->getParam('table_id');
+                        $tableID = $session->getVar('table_id');
                         if (!is_null($tableID)) {
                             $instructions = $common->getParam('instructions');
                             $items = $common->getParam('items');
-                            $ordered = new DateTime($common->getParam('time_ordered'));
+                            $ordered = new DateTime();
                             if ($ordered !== false) {
                                 if (!is_null($items) && is_array($items)) {
                                     $orderItems = array();
@@ -328,24 +331,24 @@ class ApiController extends Controller {
                                             foreach ($orderItems as $orderItem) {
                                                 $db->dbQuery("INSERT INTO tbl_order_item (menu_id, status, order_id) VALUES (".implode(', ', $orderItem).")");
                                             }
-                                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'order_id'=>$orderID, 'status'=>0);
+                                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'order_id'=>$orderID, 'order_status'=>0);
                                         } else {
                                             $this->json = array('status'=>  \errors\codes::$__EMPTY);
                                         }
                                     } else {
-                                        $this->json = array('status'=>  \errors\codes::$__ERROR);
+                                        $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'A valid order was not created', 'item'=>$orderID);
                                     }
                                 } else {
-                                    $this->json = array('status'=>  \errors\codes::$__ERROR);
+                                    $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'items is not a valid post array object', 'item'=>$items);
                                 }
                             } else {
-                                $this->json = array('status'=>  \errors\codes::$__ERROR);
+                                $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'date ordered is invalid', 'item'=>$ordered);
                             }
                         } else {
-                            $this->json = array('status'=>  \errors\codes::$__ERROR);
+                            $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'the session has no table id');
                         }
                     } else {
-                        $this->json = array('status'=>  \errors\codes::$__ERROR);
+                        $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'submitted is required');
                     }
                     break;
                 case "status":

@@ -45,6 +45,7 @@ class common {
         curl_setopt($curlSession, CURLOPT_HEADER, 0);
         curl_setopt($curlSession, CURLOPT_POST, 1);
         curl_setopt($curlSession, CURLOPT_POSTFIELDS, http_build_query($data));
+        
         curl_setopt($curlSession, CURLOPT_RETURNTRANSFER,1); 
         curl_setopt($curlSession, CURLOPT_TIMEOUT,30); 
 
@@ -65,6 +66,10 @@ class common {
                     $output->statusMsg = curl_error($curlSession);
                 } else {
                     $output = json_decode($rawresponse);
+                    if (!is_object($output)) {
+                        $output = new stdClass();
+                    }
+                    $output->buildQuery = http_build_query($data);
                 }
                 break;
             case 'pairs':
