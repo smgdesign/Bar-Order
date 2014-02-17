@@ -348,6 +348,18 @@ class ApiController extends Controller {
                         $this->json = array('status'=>  \errors\codes::$__ERROR);
                     }
                     break;
+                case "status":
+                    if (!is_null($common->getParam('id'))) {
+                        $order = $this->Api->orders('get', $common->getParam('id'));
+                        if (!empty($order)) {
+                            $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>array('status'=>$order['status'], 'items'=>$order['items']));
+                        } else {
+                            $this->json = array('status'=>  \errors\codes::$__ERROR);
+                        }
+                    } else {
+                        $this->json = array('status'=>  \errors\codes::$__ERROR);
+                    }
+                    break;
             }
         } else {
             $this->json = array('status'=>  \errors\codes::$__ERROR);
@@ -366,10 +378,21 @@ class ApiController extends Controller {
                             'mode'=>'update',
                             'where'=>array('id'=>$common->getParam('id'))
                         ),
+                        'tbl_order_item'=>array(
+                            'field'=>array(
+                                'status'=>$common->getParam('status')
+                            ),
+                            'mode'=>'update',
+                            'where'=>array('order_id'=>$common->getParam('id'))
+                        ),
                         'response'=>array(
-                            'tbl_order'=>array('id'=>$common->getParam('id'))
+                            'tbl_order'=>array('id'=>$common->getParam('id')),
+                            'tbl_order_item'=>array('order_id'=>$common->geParam('id'))
                         )
                     );
+                    if ($common->getParam('status') == 3) {
+                        $data['tbl_order']['fields']['time_completed'] = 'NOW()';
+                    }
                     $update = \data\collection::buildQuery("INSERT", $data);
                     if ($update['success']) {
                         $this->json = array('status'=>  \errors\codes::$__SUCCESS);
@@ -381,7 +404,31 @@ class ApiController extends Controller {
                 }
                 break;
             case "item":
-                
+                if (!is_null($common->getParam('id')) && !is_null($common->getParam('item_id')) && !is_null($common->getParam('status'))) {
+                    $data = array(
+                        'tbl_order_item'=>array(
+                            'fields'=>array(
+                                'status'=>$common->getParam('status')
+                            ),
+                            'mode'=>'update',
+                            'where'=>array('order_id'=>$common->getParam('id'), 'menu_id'=>$common->getParam('item_id'))
+                        ),
+                        'response'=>array(
+                            'tbl_order_item'=>array('order_id'=>$common->getParam('id'))
+                        )
+                    );
+                    if ($common->getParam('status') == 3) {
+                        $data['tbl_order_item']['fields']['time_prepared'] = 'NOW()';
+                    }
+                    $update = \data\collection::buildQuery("INSERT", $data);
+                    if ($update['success']) {
+                        $this->json = array('status'=>  \errors\codes::$__SUCCESS);
+                    } else {
+                        $this->json = array('status'=>  \errors\codes::$__ERROR);
+                    }
+                } else {
+                    $this->json = array('status'=>  \errors\codes::$__ERROR, 'message'=>'id, item_id and status are required');
+                }
                 break;
         }
         

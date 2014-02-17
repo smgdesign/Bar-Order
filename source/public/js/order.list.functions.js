@@ -54,4 +54,19 @@ $(function() {
             $(this).fadeTo("250", 1);
         }
     }, 'a.edit_btn');
+    
+    $("body").on('change', "select[name='item_status']", function() {
+        var $this = $(this),
+            $td = $(this).parent();
+        $.ajax({
+            'url': '/api/change_status/item',
+            'type': 'post',
+            'dataType': 'json',
+            'data': {'id': $("input[name='order_id']", $this.parent()).val(), 'item_id': $("input[name='item_id']", $this.parent()).val(), 'status': $this.val()}
+        }).done(function(i) {
+            if (i.status.code === 4) {
+                $td.removeClass().addClass('status_'+$this.val());
+            }
+        });
+    });
 });

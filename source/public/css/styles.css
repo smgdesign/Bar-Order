@@ -106,32 +106,28 @@ body {
     font-weight: bold;
     color: #444444;
 }
-.order_list tr.status_0 {
+.order_list tr.status_0, .order_items td.status_0 {
     background: #ffefbf;
 }
-.order_list tr.status_1 {
+.order_list tr.status_1, .order_items td.status_1 {
     background: #fbdec0;
 }
-.order_list tr.status_2 {
+.order_list tr.status_2, .order_items td.status_2 {
     background: #f3fbc1;
 }
-.order_list tr.status_3 {
+.order_list tr.status_3, .order_items td.status_3 {
     background: #cdf8c0;
 }
-.order_list tr.status_4 {
+.order_list tr.status_4, .order_items td.status_4 {
     background: #8c0000;
 }
-.order_list tr td, .order_list tr td select {
+.order_list tr td, .order_list tr td select, .order_items tr td, .order_items tr td select {
     color: #444444;
 }
-.order_list tr.status_4 td {
+.order_list tr.status_4 td, .order_items td.status_4 {
     color: #ffffff;
 }
-.order_list tr td select {
-    color: #444444;
-    background: url(/img/select_down.png) no-repeat right top;
-}
-.order_list tr.status_4 td select {
+.order_list tr.status_4 td select, .order_items td.status_4 select {
     color: #ffffff;
     background-position: right bottom;
 }
@@ -139,7 +135,7 @@ body {
     background: #ffffff;
     color: #444444;
 }
-.order_list td select {
+.order_list td select, .order_items td select {
     font-family: Arial, sans-serif;
     font-weight: bold;
     font-size: 1em;
@@ -148,6 +144,11 @@ body {
     -webkit-appearance: none;
     width: 100%;
     padding-right: 20px;
+    height: 17px;
+}
+.order_list tr td select, .order_items td select {
+    color: #444444;
+    background: url(/img/select_down.png) no-repeat right top;
 }
 a.view_order_btn {
     background: #444444;
