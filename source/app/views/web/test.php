@@ -75,7 +75,7 @@ if (isset($order)) {
     <ul>
     <?php
     foreach ($orders as $id=>$item) {
-        echo '<li>'.$item->title.' Quantity: <input size="4" type="text" name="items['.$id.']" /></li>';
+        echo '<li>'.$item->title.' Quantity: <input size="4" type="text" name="items['.$id.']" style="width: 25px;" /></li>';
     }
     ?>
     </ul>
