@@ -109,4 +109,32 @@ class Model {
                 break;
         }
     }
+    public function ingredients($mode='list') {
+        switch ($mode) {
+            case "list":
+                $tbl = array(
+                    'i'=>'tbl_ingredient'
+                );
+                $cols = array(
+                    'i'=>array('*')
+                );
+                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols);
+                return $data[0];
+                break;
+        }
+    }
+    public function categories($mode='list') {
+        switch ($mode) {
+            case "list":
+                $tbl = array(
+                    'c'=>'tbl_category'
+                );
+                $cols = array(
+                    'c'=>array('*')
+                );
+                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols);
+                return $data[0];
+                break;
+        }
+    }
 }

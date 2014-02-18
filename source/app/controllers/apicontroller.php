@@ -210,7 +210,7 @@ class ApiController extends Controller {
                 if ($data[1] > 0) {
                     foreach ($data[0] as $item) {
                         if (!isset($menu[$item['id']])) {
-                            $menu[$item['id']] = array('location_id'=>$item['location_id'], 'title'=>$item['title'], 'desc'=>$item['desc'], 'price'=>$item['price'], 'ingredients'=>array());
+                            $menu[$item['id']] = array('location_id'=>$item['location_id'], 'title'=>$item['title'], 'desc'=>$item['desc'], 'price'=>$item['price'], 'ingredients'=>array(), 'categories'=>array());
                         }
                         if (!is_null($item['ingredient_id'])) {
                             $menu[$item['id']]['ingredients'][] = array('id'=>$item['ingredient_id'], 'title'=>$item['ingredient'], 'desc'=>$item['ingredient_desc']);
