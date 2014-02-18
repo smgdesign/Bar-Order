@@ -60,8 +60,8 @@
             </ul>
             <input type="hidden" name="submitted" value="TRUE" />
             <input type="hidden" name="location_id" value="<?php echo $locationID; ?>" />
-            <input type="submit" name="add" value="Create" id="form_btn" />
         </div>
+        <input type="submit" name="add" value="Create" id="form_btn" />
     </form>
 </div>
 <script type="text/javascript">
