@@ -23,14 +23,14 @@ body {
     margin: 27px 55px;
     font-weight: normal;
 }
-#head ul {
+#head > ul {
     float: right;
     list-style: none;
     margin: 0;
     padding: 0;
     margin: 27px 55px 27px 0;
 }
-#head ul li {
+#head > ul > li {
     font-size: 1.6em;
     display: inline;
     margin: 0 15px;
@@ -38,13 +38,27 @@ body {
     padding: 0 15px;
     border-left: 1px solid #ffffff;
 }
-#head ul li.first {
+#head > ul > li.first {
     padding: 15px;
     border: none;
 }
-#head ul li a {
+#head > ul > li > a {
     color: #ffffff;
     text-decoration: none;
+}
+#head > ul > li.sub_menu > ul {
+    display: none;
+    float: right;
+    list-style: none;
+    padding: 0;
+    margin: 0px 55px 0px 0;
+}
+#head > ul > li.sub_menu > ul > li {
+    font-size: 1.1em;
+    display: inline;
+    margin: 0 0;
+    padding: 0 15px;
+    border-left: 1px solid #ffffff;
 }
 #login_box {
     width: 400px;
@@ -166,7 +180,7 @@ input[type='file'] {
 }
 .order_list td.order_id {
     background: #ffffff;
-    color: #444444;
+    color: #444444 !important;
 }
 .order_list td select, .order_items td select {
     font-family: Arial, sans-serif;
@@ -179,9 +193,13 @@ input[type='file'] {
     padding-right: 20px;
     height: 17px;
 }
+.order_list .order_status_select {
+    padding: 0 24px;
+}
 .order_list tr td select, .order_items td select {
     color: #444444;
     background: url(/img/select_down.png) no-repeat right top;
+    height: 65px;
 }
 a.view_order_btn {
     background: #444444;
@@ -190,7 +208,6 @@ a.view_order_btn {
     padding: 14px;
     text-decoration: none;
 }
-
 
 /*admin */
 .ingredient_list, .category_list {

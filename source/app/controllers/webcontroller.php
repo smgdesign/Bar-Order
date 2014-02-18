@@ -91,7 +91,7 @@ class WebController extends Controller {
                         $err[] = 'Title is required';
                     }
                     if (!is_null($common->getParam('desc'))) {
-                        $data['tbl_menu']['fields']['desc'] = $common->getParam('title');
+                        $data['tbl_menu']['fields']['desc'] = $common->getParam('desc');
                     }
                     if (!is_null($common->getParam('price'))) {
                         $data['tbl_menu']['fields']['price'] = number_format($common->getParam('price'), 2);
@@ -201,6 +201,18 @@ class WebController extends Controller {
         }
         if (!empty($err)) {
             $this->set('error', $err);
+        }
+    }
+    public function orders($action='list') {
+        global $common;
+        $this->isJSON = true;
+        $this->_template->xhr = true;
+        $common->isPage = false;
+        switch ($action) {
+            case "list":
+                $data = $this->Web->orders('list');
+                $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>$data['data'], 'lastSync'=>$data['lastSync']->format('Y-m-d H:i:s'));
+                break;
         }
     }
 }

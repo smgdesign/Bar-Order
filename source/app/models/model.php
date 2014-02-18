@@ -10,9 +10,11 @@ class Model {
         $this->_model = get_class($this);
     }
     public function orders($mode='list', $id=0) {
+        global $common;
         switch ($mode) {
             case "list":
                 global $session;
+                $setSync = false;
                 if (!is_null($session->getVar('location_id'))) {
                     $tbl = array(
                         'o'=>'tbl_order'
@@ -38,7 +40,22 @@ class Model {
                             )
                         )
                     );
-                    $order = array('ORDER BY time_ordered DESC');
+                    if (!is_null($common->getParam('last'))) {
+                        $last = ($common->getParam('last') == 'first') ? new DateTime() : new DateTime($common->getParam('last'));
+                        if ($last === false) {
+                            $last = new DateTime();
+                        }
+                        $cond['o'] = array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'time_ordered',
+                                'operand'=>'>=',
+                                'value'=>"'{$last->format('Y-m-d H:i:s')}'"
+                            )
+                        );
+                        $setSync = true;
+                    }
+                    $order = array('ORDER BY o.time_ordered DESC');
                     $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond, $order);
                     if ($data[1] > 0) {
                         $orders = array();
@@ -51,8 +68,15 @@ class Model {
                                 $orders[$item['id']]['total'] = $orders[$item['id']]['total']+$item['price'];
                             }
                         }
-                        return $orders;
+                        if ($setSync) {
+                            return array('data'=>$orders, 'lastSync'=>new DateTime());
+                        } else {
+                            return $orders;
+                        }
                     } else {
+                        if ($setSync) {
+                            return array('data'=>array(), 'lastSync'=>new DateTime());
+                        }
                         return array();
                     }
                 }

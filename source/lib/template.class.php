@@ -64,4 +64,16 @@ class Template {
         }
         return $output;
     }
+    public function radioList($name='', $list=array(), $sel='') {
+        $output = '';
+        if (!empty($list)) {
+            $UID = uniqid('item_');
+            $i = 0;
+            foreach ($list as $val=>$item) {
+                $output .= '<label for="'.$UID.'_'.$i.'">'.$item.'</label><input name="'.$name.'" type="radio" id="'.$UID.'_'.$i.'" value="'.$val.'" '.(($val == $sel) ? 'checked="checked"' : '').' />';
+                $i++;
+            }
+        }
+        return $output;
+    }
 }

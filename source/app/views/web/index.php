@@ -18,7 +18,7 @@ if (!empty($orders)) {
         <tr class="status_<?php echo $order['status']; ?>">
             <td align="center" width="60" class="order_id"><?php echo $id; ?></td>
             <td align="center" width="100"><?php echo $order['table']; ?></td>
-            <td><input type="hidden" name="order_id" value="<?php echo $id; ?>" /><select name="order_status">
+            <td class="order_status_select"><input type="hidden" name="order_id" value="<?php echo $id; ?>" /><select name="order_status">
                     <?php
                     echo $this->selectList($this->orderStatuses(), $order['status']);
                     ?>

@@ -28,11 +28,19 @@
                 } else {
                 ?>
                 <li class="first">Logged in as <?php echo $session->getVar('username'); ?></li>
-                <li><a href="/web/add/menu">Add item to menu</a></li>
+                <li><a href="/">View orders</a></li>
+                <li class="sub_menu">
+                    <a href="/web/items/menu">Menu items</a>
+                    <ul>
+                        <li><a href="/web/edit/menu">Edit menu item</a></li>
+                        <li><a href="/web/add/menu">Add menu item</a></li>
+                    </ul>
+                </li>
+                <li><a href="/web/items/locations">Locations</a></li>
                 <?php
                     if ($auth->level > 1) {
                         ?>
-                <li><a href="/web/add/venue">Add Venue</a></li>
+                <li><a href="/web/add/venue">Venues</a></li>
                 <?php
                     }
                     ?>

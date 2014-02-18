@@ -18,6 +18,7 @@ class ApiController extends Controller {
                             $data['locations'] = $this->location('list');
                             $data['tables'] = $this->table('list');
                             $data['menu'] = $this->menu('list');
+                            $data['sponsors'] = $this->sponsors('list');
                             $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$data);
                             $db->dbQuery("UPDATE tbl_device SET last_sync=NOW() WHERE id={$device['device_id']}");
                         } else {
@@ -210,7 +211,7 @@ class ApiController extends Controller {
                 if ($data[1] > 0) {
                     foreach ($data[0] as $item) {
                         if (!isset($menu[$item['id']])) {
-                            $menu[$item['id']] = array('location_id'=>$item['location_id'], 'title'=>$item['title'], 'desc'=>$item['desc'], 'price'=>$item['price'], 'ingredients'=>array(), 'categories'=>array());
+                            $menu[$item['id']] = array('location_id'=>$item['location_id'], 'title'=>$item['title'], 'icon'=>$item['icon'], 'desc'=>$item['desc'], 'price'=>$item['price'], 'ingredients'=>array(), 'categories'=>array());
                         }
                         if (!is_null($item['ingredient_id'])) {
                             $menu[$item['id']]['ingredients'][] = array('id'=>$item['ingredient_id'], 'title'=>$item['ingredient'], 'desc'=>$item['ingredient_desc']);
@@ -253,6 +254,32 @@ class ApiController extends Controller {
                 break;
         }
     }
+    public function sponsors($action='list') {
+        global $session;
+        if (!$this->checkContinue()) return;
+        $table = array(
+            'a'=>'tbl_advert'
+        );
+        $cols = array(
+            'a'=>array('img AS image', 'link')
+        );
+        $cond = array(
+            'a'=>array(
+                'join'=>'AND',
+                array(
+                    'col'=>'venue_id',
+                    'operand'=>'=',
+                    'value'=>$session->getVar('venue_id')
+                )
+            )
+        );
+        $data = \data\collection::buildQuery("SELECT", $table, array(), $cols, $cond);
+        if ($data[1] > 0) {
+            return array('status'=>  \errors\codes::$__FOUND, 'data'=>$data[0]);
+        } else {
+            return array('status'=>  \errors\codes::$__EMPTY);
+        }
+    }
     public function order($action='list') {
         global $auth, $db, $common, $session;
         if (!$this->checkContinue()) return;
@@ -261,6 +288,7 @@ class ApiController extends Controller {
             $deviceID = $device['id'];
             switch ($action) {
                 case "list":
+                    $last = new DateTime();
                     $tbl = array(
                         'o'=>'tbl_order'
                     );
@@ -300,7 +328,7 @@ class ApiController extends Controller {
                             }
                         }
                         if (!empty($orders)) {
-                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$orders);
+                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$orders, 'lastSync'=>$last->format('Y-m-d H:i:s'));
                         } else {
                             $this->json = array('status'=>\errors\codes::$__EMPTY, 'message'=>'Orders were found, but not matching criteria.', 'query'=>array($tbl, $joins, $cols, $cond));
                         }
@@ -382,7 +410,7 @@ class ApiController extends Controller {
                             'where'=>array('id'=>$common->getParam('id'))
                         ),
                         'tbl_order_item'=>array(
-                            'field'=>array(
+                            'fields'=>array(
                                 'status'=>$common->getParam('status')
                             ),
                             'mode'=>'update',
@@ -390,7 +418,7 @@ class ApiController extends Controller {
                         ),
                         'response'=>array(
                             'tbl_order'=>array('id'=>$common->getParam('id')),
-                            'tbl_order_item'=>array('order_id'=>$common->geParam('id'))
+                            'tbl_order_item'=>array('order_id'=>$common->getParam('id'))
                         )
                     );
                     if ($common->getParam('status') == 3) {
