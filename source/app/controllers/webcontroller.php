@@ -13,9 +13,9 @@ class WebController extends Controller {
     }
     public function index() {
         $this->level = 1;
+        if (!$this->checkWebContinue()) return;
         $this->_template->headIncludes[] = '<script type="text/javascript" src="/js/modal.popup.js"></script>';
         $this->_template->headIncludes[] = '<script type="text/javascript" src="/js/order.list.functions.js"></script>';
-        if (!$this->checkWebContinue()) return;
         $this->set('title', 'Web Portal');
         $this->set('orders', $this->Web->orders('list'));
     }
@@ -51,6 +51,8 @@ class WebController extends Controller {
     }
     public function view($id='') {
         global $common;
+        $this->level = 1;
+        if (!$this->checkWebContinue()) return;
         $this->_template->xhr = true;
         if (!empty($id)) {
             $this->set('order', $this->Web->orders('get', $id));
@@ -60,6 +62,8 @@ class WebController extends Controller {
     }
     public function add($mode='menu') {
         global $common, $session;
+        $this->level = 1;
+        if (!$this->checkWebContinue()) return;
         $this->set('title', 'Add '.$mode);
         $this->set('mode', $mode);
         $this->set('locationID', $session->getVar('location_id'));
