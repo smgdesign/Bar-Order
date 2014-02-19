@@ -305,11 +305,24 @@ class ApiController extends Controller {
                     );
                     $cond = array(
                         'o'=>array(
-                            'join'=>'AND',
+                            'join'=>'OR',
                             array(
                                 'col'=>'device_id',
                                 'operand'=>'=',
                                 'value'=>$deviceID
+                            ),
+                            'o'=>array(
+                                'join'=>'AND',
+                                array(
+                                    'col'=>'table_id',
+                                    'operand'=>'=',
+                                    'value'=>$session->getVar('table_id')
+                                ),
+                                array(
+                                    'col'=>'time_completed',
+                                    'operand'=>'=',
+                                    'value'=>"'0000-00-00 00:00:00'"
+                                )
                             )
                         )
                     );
@@ -421,8 +434,8 @@ class ApiController extends Controller {
                             'tbl_order_item'=>array('order_id'=>$common->getParam('id'))
                         )
                     );
-                    if ($common->getParam('status') == 3) {
-                        $data['tbl_order']['fields']['time_completed'] = 'NOW()';
+                    if ((int)$common->getParam('status') == 3) {
+                        $data['tbl_order']['fields']['time_completed'] = '_NOW_';
                     }
                     $update = \data\collection::buildQuery("INSERT", $data);
                     if ($update['success']) {

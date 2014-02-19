@@ -42,21 +42,47 @@ class collection {
                                     $joiner = $blocks['join'];
                                     unset($blocks['join']);
                                     $blockArr = array();
-                                    foreach ($blocks as $condit) {
-                                        if ($condit['operand'] != 'IN') {
-                                            $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' '.$condit['value'];
-                                        } else {
-                                            $val = '';
-                                            if (is_array($condit['value'])) {
-                                                $val = "'".implode("','", $condit['value'])."'";
-                                                $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' ('.$val.')';
+                                    $subWhere = array();
+                                    foreach ($blocks as $subRef=>$condit) {
+                                        if (array_key_exists('join', $condit) === false) {
+                                            if ($condit['operand'] != 'IN') {
+                                                $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' '.$condit['value'];
                                             } else {
-                                                $err[] = $ref.'.'.$condit['col'].' IN requires an array';
+                                                $val = '';
+                                                if (is_array($condit['value'])) {
+                                                    $val = "'".implode("','", $condit['value'])."'";
+                                                    $blockArr[] = $ref.'.'.$condit['col'].' '.$condit['operand'].' ('.$val.')';
+                                                } else {
+                                                    $err[] = $ref.'.'.$condit['col'].' IN requires an array';
+                                                }
+                                            }
+                                        } else {
+                                            $subJoiner = $condit['join'];
+                                            unset($condit['join']);
+                                            $subBlockArr = array();
+                                            foreach ($condit as $subCondit) {
+                                                if ($subCondit['operand'] != 'IN') {
+                                                    $subBlockArr[] = $subRef.'.'.$subCondit['col'].' '.$subCondit['operand'].' '.$subCondit['value'];
+                                                } else {
+                                                    $subVal = '';
+                                                    if (is_array($subCondit['value'])) {
+                                                        $subVal = "'".implode("','", $subCondit['value'])."'";
+                                                        $blockArr[] = $subRef.'.'.$subCondit['col'].' '.$subCondit['operand'].' ('.$subVal.')';
+                                                    } else {
+                                                        $err[] = $subRef.'.'.$subCondit['col'].' IN requires an array';
+                                                    }
+                                                }
+                                            }
+                                            if (!empty($subBlockArr)) {
+                                                $subWhere[] = "(".implode(' '.$subJoiner.' ', $subBlockArr).")";
                                             }
                                         }
                                     }
                                     if (!empty($blockArr)) {
-                                        $where[] = "(".implode(' '.$joiner.' ', $blockArr).")";
+                                        $subWhere[] = "(".implode(' '.$joiner.' ', $blockArr).")";
+                                    }
+                                    if (isset($joiner) && !empty($subWhere)) {
+                                        $where[] = "(".implode(' '.$joiner.' ', $subWhere).")";
                                     }
                                 } else {
                                     // this means there's deeper work to do \\

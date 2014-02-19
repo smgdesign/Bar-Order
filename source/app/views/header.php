@@ -15,6 +15,44 @@
             echo $include;
         }
         ?>
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $(".sub_menu > a").click(function(ev) {
+                ev.preventDefault();
+                $(this).parent().find('ul').show();
+            });
+            $("a.list_menu").click(function(ev) {
+                ev.preventDefault();
+                var $this = $(this);
+                if ($this.next('select').length > 0) {
+                    $this.next('select').empty().remove();
+                } else {
+                    $.ajax({
+                        'url': '/web/menu/list',
+                        'dataType': 'json',
+                        'success': function(i) {
+                            if (i.status.code === 3) {
+                                var dataL = i.data.length;
+                                if (dataL > 0) {
+                                    var tmpObj = $('<select name="menu_list" style="position: absolute;"></select>');
+                                    tmpObj.append('<option value="">Please select one...</option>')
+                                    for (var x = 0; x < dataL; x++) {
+                                        tmpObj.append('<option value="'+i.data[x].id+'">'+i.data[x].title+'</option>');
+                                    }
+                                    $this.after(tmpObj);
+                                    tmpObj.change(function() {
+                                        if ($(this).val() !== '') {
+                                            window.location = '/web/edit/menu/'+$(this).val();
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        </script>
     </head>
     <body>
         <div id="head">
@@ -32,7 +70,7 @@
                 <li class="sub_menu">
                     <a href="/web/items/menu">Menu items</a>
                     <ul>
-                        <li><a href="/web/edit/menu">Edit menu item</a></li>
+                        <li class="first"><a href="/web/edit/menu" class="list_menu">Edit menu item</a></li>
                         <li><a href="/web/add/menu">Add menu item</a></li>
                     </ul>
                 </li>

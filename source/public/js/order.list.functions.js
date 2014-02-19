@@ -32,10 +32,6 @@ var Poll = function() {
 
 $(function() {
     Poll();
-    $(".sub_menu").click(function(ev) {
-        ev.preventDefault();
-        $(this).find('ul').show();
-    });
     $(".order_list").on('change', "select[name='order_status']", function() {
         var $this = $(this),
             $row = $(this).parent().parent();

@@ -5,7 +5,9 @@
     Description:
         Bar Web Portal
 */
-
+select:focus {
+    outline: none;
+}
 body {
     font-family: Arial, sans-serif;
     font-size: 0.7em;
@@ -38,27 +40,28 @@ body {
     padding: 0 15px;
     border-left: 1px solid #ffffff;
 }
-#head > ul > li.first {
-    padding: 15px;
-    border: none;
-}
-#head > ul > li > a {
-    color: #ffffff;
-    text-decoration: none;
-}
 #head > ul > li.sub_menu > ul {
     display: none;
     float: right;
     list-style: none;
     padding: 0;
-    margin: 0px 55px 0px 0;
+    margin: 5px 55px 0px 0;
+    position: absolute;
 }
 #head > ul > li.sub_menu > ul > li {
-    font-size: 1.1em;
+    font-size: 0.9em;
     display: inline;
     margin: 0 0;
     padding: 0 15px;
     border-left: 1px solid #ffffff;
+}
+#head > ul > li.first, #head > ul > li > ul > li.first {
+    padding: 15px;
+    border: none;
+}
+#head > ul > li > a, #head > ul > li > ul > li > a {
+    color: #ffffff;
+    text-decoration: none;
 }
 #login_box {
     width: 400px;
@@ -248,8 +251,8 @@ a.view_order_btn {
     color: #aaaaaa;
 }
 
-.modalContainer                     {z-index: 3000; position:absolute; top:0; left:0;}
-.modalPopup                         {position: absolute; background:#ffffff; padding:20px 0; border:2px solid #cccccc;}
+.modalContainer                     {z-index: 3000; position:fixed; top:0; left:0;}
+.modalPopup                         {position: fixed; background:#ffffff; padding:20px 0; border:2px solid #cccccc;}
 .tooltipClose,
 .modalClose                         {position: absolute; top:-22px; right:-22px; width:40px; height:40px; background: url(/img/close.png) no-repeat center; cursor:pointer; z-index: 3001;}
 .modalContent                       {overflow: auto; }

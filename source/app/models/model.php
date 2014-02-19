@@ -133,6 +133,32 @@ class Model {
                 break;
         }
     }
+    public function menu($mode='list') {
+        global $session;
+        switch ($mode) {
+            case "list":
+                $tbl = array('m'=>'tbl_menu');
+                $cols = array(
+                    'm'=>array('id', 'title')
+                );
+                $cond = array(
+                    'm'=>array(
+                        'join'=>'AND',
+                        array(
+                            'col'=>'location_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('location_id')
+                        )
+                    )
+                );
+                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond);
+                if ($data[1] > 0) {
+                    return $data[0];
+                }
+                return array();
+                break;
+        }
+    }
     public function ingredients($mode='list') {
         switch ($mode) {
             case "list":
