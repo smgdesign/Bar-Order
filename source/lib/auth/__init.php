@@ -38,11 +38,14 @@ class authentication {
         if (!empty($username) && !empty($pass)) {
             $passSalt = $this->encrypt->generateSalt($username);
             $passEnc = $this->encrypt->generateHash($passSalt, $pass);
-            $user = $db->dbResult($db->dbQuery("SELECT id, username, location_id, level FROM tbl_users WHERE username='$username' AND password='$passEnc'"));
+            $user = $db->dbResult($db->dbQuery("SELECT u.id, u.username, u.location_id, u.level, v.parent_id FROM tbl_users AS u
+                                                LEFT JOIN tbl_venue AS v ON v.id=u.location_id
+                                                WHERE u.username='$username' AND u.password='$passEnc'"));
             if ($user[1] > 0) {
                 $session->addVar('id', $user[0][0]['id']);
                 $session->addVar('username', $user[0][0]['username']);
                 $session->addVar('location_id', $user[0][0]['location_id']);
+                $session->addVar('venue_id', $user[0][0]['parent_id']);
                 $session->addVar('level', $user[0][0]['level']);
                 $cur = new DateTime();
                 $session->addVar('last_action', $cur->getTimestamp());

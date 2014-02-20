@@ -143,15 +143,21 @@ class Model {
                 );
                 $cond = array(
                     'm'=>array(
-                        'join'=>'AND',
+                        'join'=>'OR',
                         array(
                             'col'=>'location_id',
                             'operand'=>'=',
                             'value'=>$session->getVar('location_id')
+                        ),
+                        array(
+                            'col'=>'location_id',
+                            'operand'=>'=',
+                            'value'=>$session->getVar('venue_id')
                         )
                     )
                 );
-                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond);
+                $additional = array("ORDER BY m.title ASC");
+                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond, $additional);
                 if ($data[1] > 0) {
                     return $data[0];
                 }

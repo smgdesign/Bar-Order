@@ -71,7 +71,7 @@
                     <a href="/web/items/menu">Menu items</a>
                     <ul>
                         <li class="first"><a href="/web/edit/menu" class="list_menu">Edit menu item</a></li>
-                        <li><a href="/web/add/menu">Add menu item</a></li>
+                        <li><a href="/web/edit/menu">Add menu item</a></li>
                     </ul>
                 </li>
                 <li><a href="/web/items/locations">Locations</a></li>
