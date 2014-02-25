@@ -193,4 +193,42 @@ class Model {
                 break;
         }
     }
+    public function venue($mode='list') {
+        switch ($mode) {
+            case "list":
+                $tbl = array(
+                    'v'=>'tbl_venue'
+                );
+                $cols = array(
+                    'v'=>array('*')
+                );
+                $cond = array(
+                    'v'=>array(
+                        'join'=>'AND',
+                        array(
+                            'col'=>'parent_id',
+                            'operand'=>'=',
+                            'value'=>0
+                        )
+                    )
+                );
+                $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond);
+                return $data[0];
+                break;
+        }
+    }
+    public function location($mode='list') {
+        global $auth;
+        switch ($mode) {
+            case "list":
+                if ($auth->level < 1) {
+                    // this means we need just the sub locations of this venue \\
+
+                } else {
+                    $cond = array();
+                }
+                break;
+        }
+        
+    }
 }

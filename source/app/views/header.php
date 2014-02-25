@@ -22,20 +22,21 @@
                 $(".sub_menu ul").hide();
                 $(this).parent().find('ul').show();
             });
-            $("a.list_menu").click(function(ev) {
+            $("a.list").click(function(ev) {
+                var tgt = $(this).prop('href').split('#')[1];
                 ev.preventDefault();
                 var $this = $(this);
                 if ($this.next('select').length > 0) {
                     $this.next('select').empty().remove();
                 } else {
                     $.ajax({
-                        'url': '/web/menu/list',
+                        'url': '/web/'+tgt+'/list',
                         'dataType': 'json',
                         'success': function(i) {
                             if (i.status.code === 3) {
                                 var dataL = i.data.length;
                                 if (dataL > 0) {
-                                    var tmpObj = $('<select name="menu_list" style="position: absolute;"></select>');
+                                    var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
                                     tmpObj.append('<option value="">Please select one...</option>')
                                     for (var x = 0; x < dataL; x++) {
                                         tmpObj.append('<option value="'+i.data[x].id+'">'+i.data[x].title+'</option>');
@@ -43,7 +44,7 @@
                                     $this.after(tmpObj);
                                     tmpObj.change(function() {
                                         if ($(this).val() !== '') {
-                                            window.location = '/web/edit/menu/'+$(this).val();
+                                            window.location = '/web/edit/'+tgt+'/'+$(this).val();
                                         }
                                     });
                                 }
@@ -71,24 +72,24 @@
                 <li class="sub_menu">
                     <a href="/web/items/menu">Menu items</a>
                     <ul>
-                        <li class="first"><a href="/web/edit/menu" class="list_menu">Edit menu item</a></li>
+                        <li class="first"><a href="#menu" class="list">Edit menu item</a></li>
                         <li><a href="/web/edit/menu">Add menu item</a></li>
                     </ul>
                 </li>
                 <li class="sub_menu">
                     <a href="/web/items/venues">Venues</a>
                     <ul>
-                        <li class="first"><a href="/web/edit/venue" class="list_venue">Edit venue</a></li>
+                        <li class="first"><a href="#venue" class="list">Edit venue</a></li>
                         <?php
                         if ($auth->level > 1) {
                         ?>
                         <li><a href="/web/edit/venue">Add venue</a></li>
-                        <li><a href="/web/edit/location" class="list_location">Edit location</a></li>
+                        <li><a href="#location" class="list">Edit location</a></li>
                         <?php
                         }
                         ?>
                         <li><a href="/web/edit/location">Add location</a></li>
-                        <li><a href="/web/edit/table" class="list_table">Edit table</a></li>
+                        <li><a href="#table" class="list">Edit table</a></li>
                         <li><a href="/web/edit/table">Add table</a></li>
                     </ul>
                 </li>

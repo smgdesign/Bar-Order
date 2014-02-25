@@ -271,6 +271,62 @@ class WebController extends Controller {
                 $this->set('ingredients', $this->Web->ingredients('list'));
                 $this->set('categories', $this->Web->categories('list'));
                 break;
+            case "venue":
+            case "location":
+                if (!is_null($common->getParam('submitted'))) {
+                    $data = array(
+                        'response'=>array(
+                            'tbl_venue'=>array('id'=>0)
+                        ),
+                        'tbl_venue'=>array('fields'=>array())
+                    );
+                    if (!is_null($common->getParam('venue_id')) && $common->getParam('venue_id') != 0) {
+                        $id = $common->getParam('venue_id');
+                        $data['tbl_venue']['mode'] = 'update';
+                        $data['tbl_venue']['where'] = array('id'=>$id);
+                        $data['response']['tbl_venue']['id'] = $id;
+                    }
+                    if (!is_null($common->getParam('title'))) {
+                        $data['tbl_venue']['fields']['title'] = $common->getParam('title');
+                    } else {
+                        $err[] = 'Title is required';
+                    }
+                    if (!is_null($common->getParam('parent_id'))) {
+                        $data['tbl_venue']['fields']['parent_id'] = $common->getParam('parent_id');
+                    }
+                    if (empty($err)) {
+                        $this->set('data', \data\collection::buildQuery("INSERT", $data));
+                    } else {
+                        $this->set('error', $err);
+                    }
+                }
+                $this->set('action', 'add');
+                if ($id != 0) {
+                    $this->set('action', 'edit');
+                    $tbl = array(
+                        'v'=>'tbl_venue'
+                    );
+                    $joins = array();
+                    $cols = array(
+                        'v'=>array('*')
+                    );
+                    $cond = array(
+                        'v'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'id',
+                                'operand'=>'=',
+                                'value'=>$id
+                            )
+                        )
+                    );
+                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
+                    if ($data[1] > 0) {
+                        $this->set('info', $data[0][0]);
+                    }
+                    $this->set('id', $id);
+                }
+                break;
         }
         if (!empty($err)) {
             $this->set('error', $err);
@@ -314,6 +370,13 @@ class WebController extends Controller {
                         \data\collection::buildQuery("DELETE", $del);
                     }
                     break;
+                case "venue":
+                case "location":
+                    $del = array(
+                        'tbl_venue'=>array('id'=>$id)
+                    );
+                    \data\collection::buildQuery("DELETE", $del);
+                    break;
             }
             
         }
@@ -338,6 +401,28 @@ class WebController extends Controller {
         switch ($action) {
             case "list":
                 $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>$this->Web->menu('list'));
+                break;
+        }
+    }
+    public function venue($action='list') {
+        global $common;
+        $this->isJSON = true;
+        $this->_template->xhr = true;
+        $common->isPage = false;
+        switch ($action) {
+            case "list":
+                $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>$this->Web->venue('list'));
+                break;
+        }
+    }
+    public function location($action='list') {
+        global $common;
+        $this->isJSON = true;
+        $this->_template->xhr = true;
+        $common->isPage = false;
+        switch ($action) {
+            case "list":
+                $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>$this->Web->location('list'));
                 break;
         }
     }
