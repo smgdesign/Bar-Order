@@ -173,7 +173,7 @@ class WebController extends Controller {
                                                     $data['tbl_category']['rows'][$i] = array(
                                                         'fields'=>array(
                                                             'title'=>$newCategories['name'][$i],
-                                                            'desc'=>$newCat['desc'][$i]
+                                                            'desc'=>$newCategories['desc'][$i]
                                                         )
                                                     );
                                                     $data['tbl_category_hooks']['rows'][] = array(
@@ -303,7 +303,7 @@ class WebController extends Controller {
                     );
                     $img = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
                     if ($img[1] > 0) {
-                        if (file_exists(uploadDir.basename($img[0][0]['icon']))) {
+                        if (!empty($img[0][0]['icon']) && file_exists(uploadDir.basename($img[0][0]['icon']))) {
                             unlink(uploadDir.basename($img[0][0]['icon']));
                         }
                         $del = array(
