@@ -19,6 +19,7 @@
         $(document).ready(function() {
             $(".sub_menu > a").click(function(ev) {
                 ev.preventDefault();
+                $(".sub_menu ul").hide();
                 $(this).parent().find('ul').show();
             });
             $("a.list_menu").click(function(ev) {
@@ -74,14 +75,23 @@
                         <li><a href="/web/edit/menu">Add menu item</a></li>
                     </ul>
                 </li>
-                <li><a href="/web/items/locations">Locations</a></li>
-                <?php
-                    if ($auth->level > 1) {
+                <li class="sub_menu">
+                    <a href="/web/items/venues">Venues</a>
+                    <ul>
+                        <li class="first"><a href="/web/edit/venue" class="list_venue">Edit venue</a></li>
+                        <?php
+                        if ($auth->level > 1) {
                         ?>
-                <li><a href="/web/add/venue">Venues</a></li>
-                <?php
-                    }
-                    ?>
+                        <li><a href="/web/edit/venue">Add venue</a></li>
+                        <li><a href="/web/edit/location" class="list_location">Edit location</a></li>
+                        <?php
+                        }
+                        ?>
+                        <li><a href="/web/edit/location">Add location</a></li>
+                        <li><a href="/web/edit/table" class="list_table">Edit table</a></li>
+                        <li><a href="/web/edit/table">Add table</a></li>
+                    </ul>
+                </li>
                 <li><a href="/auth/logout">Logout</a></li>
                 <?php
                 }

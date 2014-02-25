@@ -31,6 +31,8 @@ body {
     margin: 0;
     padding: 0;
     margin: 27px 55px 27px 0;
+    display: inline-block;
+    width: auto;
 }
 #head > ul > li {
     font-size: 1.6em;
@@ -47,6 +49,7 @@ body {
     padding: 0;
     margin: 5px 55px 0px 0;
     position: absolute;
+    width: 100%;
 }
 #head > ul > li.sub_menu > ul > li {
     font-size: 0.9em;
