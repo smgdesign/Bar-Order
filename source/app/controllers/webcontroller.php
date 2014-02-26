@@ -540,6 +540,12 @@ class WebController extends Controller {
                     );
                     \data\collection::buildQuery("DELETE", $del);
                     break;
+                case "sponsor":
+                    $del = array(
+                        'tbl_advert'=>array('id'=>$id)
+                    );
+                    \data\collection::buildQuery("DELETE", $del);
+                    break;
             }
             
         }
