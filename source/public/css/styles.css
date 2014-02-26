@@ -120,7 +120,7 @@ input[type='file'] {
     font-size: 1.3em;
     border: 1px solid #aaaaaa;
 }
-#login_btn, #form_btn {
+#login_btn, .form_btn, #form_btn {
     background: #000000;
     border: none;
     padding: 0;

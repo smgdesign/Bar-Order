@@ -399,6 +399,18 @@ class common {
     public function arrayToInt(&$val) {
         $val = intval($val);
     }
+    public function safeFilename($filename) {
+        $filename = str_replace("#","_",$filename);
+        $filename = str_replace(" ","_",$filename);
+        $filename = str_replace("'","",$filename);
+        $filename = str_replace('"',"",$filename);
+        $filename = str_replace("__","_",$filename);
+        $filename = str_replace("&","and",$filename);
+        $filename = str_replace("/","_",$filename);
+        $filename = str_replace("\\", "_",$filename);
+        $filename = str_replace("?","",$filename);
+        return $filename;
+    }
     
     public function callHook() {
     	$url = $this->getParam('url', 'get');

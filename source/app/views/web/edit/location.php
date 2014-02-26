@@ -47,7 +47,7 @@
         <div class="clear"></div>
         <input type="submit" name="add" value="<?php echo ($action == 'add') ? 'Create' : 'Update'; ?>" id="form_btn" />
         <?php if (isset($id) && $id != 0) {
-            echo '<input type="button" name="delete" value="Delete" id="form_btn" />';
+            echo '<input type="button" name="delete" value="Delete" class="form_btn" />';
         }
         ?>
     </form>
@@ -58,7 +58,7 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/venue/'+<?php echo $id; ?>,
+                    'url': '/web/delete/location/'+<?php echo $id; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }

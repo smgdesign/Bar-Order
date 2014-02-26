@@ -78,7 +78,7 @@
         </div>
         <input type="submit" name="add" value="<?php echo ($action == 'add') ? 'Create' : 'Update'; ?>" id="form_btn" />
         <?php if (isset($id) && $id != 0) {
-            echo '<input type="button" name="delete" value="Delete" id="form_btn" />';
+            echo '<input type="button" name="delete" value="Delete" class="form_btn" />';
         }
         ?>
     </form>

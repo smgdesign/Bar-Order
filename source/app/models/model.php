@@ -228,6 +228,7 @@ class Model {
         global $auth, $session;
         switch ($mode) {
             case "list":
+                $venues = array();
                 if ($auth->level < 2) {
                     $tbl = array(
                         'l'=>'tbl_venue'
@@ -272,7 +273,6 @@ class Model {
                 }
                 $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
                 if ($data[1] > 0) {
-                    $venues = array();
                     foreach ($data[0] as $location) {
                         if (!isset($venues[$location['venue_id']])) {
                             $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
@@ -288,6 +288,7 @@ class Model {
         global $auth, $session;
         switch ($mode) {
             case "list":
+                $venues = array();
                 if ($auth->level < 2) {
                     $tbl = array(
                         't'=>'tbl_table'
@@ -337,7 +338,6 @@ class Model {
                 }
                 $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
                 if ($data[1] > 0) {
-                    $venues = array();
                     foreach ($data[0] as $location) {
                         if (!isset($venues[$location['venue_id']])) {
                             $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
@@ -346,6 +346,54 @@ class Model {
                             $venues[$location['venue_id']]['locations'][$location['location_id']] = array('location_title'=>$location['location_title'], 'tables'=>array());
                         }
                         $venues[$location['venue_id']]['locations'][$location['location_id']]['tables'][$location['id']] = $location['name'];
+                    }
+                }
+                return $venues;
+                break;
+        }
+    }
+    public function sponsor($mode='list') {
+        global $auth, $session;
+        switch ($mode) {
+            case "list":
+                $venues = array();
+                if ($auth->level < 2) {
+                    $tbl = array(
+                        's'=>'tbl_advert'
+                    );
+                    $cols = array(
+                        's'=>array('*')
+                    );
+                    $cond = array(
+                        's'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'venue_id',
+                                'operand'=>'=',
+                                'value'=>$session->getVar('venue_id')
+                            )
+                        )
+                    );
+                } else {
+                    $tbl = array(
+                        's'=>'tbl_advert'
+                    );
+                    $cols = array(
+                        's'=>array('*'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 's.venue_id'))
+                    );
+                    $cond = array();
+                }
+                $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
+                if ($data[1] > 0) {
+                    foreach ($data[0] as $sponsor) {
+                        if (!isset($venues[$sponsor['venue_id']])) {
+                            $venues[$sponsor['venue_id']] = array('venue_title'=>$sponsor['venue_title'], 'sponsors'=>array());
+                        }
+                        $venues[$sponsor['venue_id']]['sponsors'][$sponsor['id']] = $sponsor['link'];
                     }
                 }
                 return $venues;
