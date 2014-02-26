@@ -123,26 +123,42 @@ class files {
         return $newHeight;  
     }  
 
-    private function getSizeByAuto($newWidth, $newHeight) {  
-        if ($this->height < $this->width) {  
-            $optimalWidth = $newWidth;  
-            $optimalHeight= $this->getSizeByFixedWidth($newWidth);  
-        } elseif ($this->height > $this->width) {  
-            $optimalWidth = $this->getSizeByFixedHeight($newHeight);  
-            $optimalHeight= $newHeight;  
-        } else {  
-            if ($newHeight < $newWidth) {  
-                $optimalWidth = $newWidth;  
-                $optimalHeight= $this->getSizeByFixedWidth($newWidth);  
-            } else if ($newHeight > $newWidth) {  
-                $optimalWidth = $this->getSizeByFixedHeight($newHeight);  
-                $optimalHeight= $newHeight;  
-            } else {  
-                // *** Sqaure being resized to a square  
-                $optimalWidth = $newWidth;  
-                $optimalHeight= $newHeight;  
-            }  
-        }  
+    private function getSizeByAuto($newWidth, $newHeight) {
+        if ($this->height < $this->width) {
+            $optimalWidth = $newWidth;
+            $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+            if ($optimalHeight > $newHeight) {
+                $optimalHeight = $newHeight;
+                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+            }
+        } elseif ($this->height > $this->width) {
+            $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+            $optimalHeight = $newHeight;
+            if ($optimalWidth > $newWidth) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+            }
+        } else {
+            if ($newHeight < $newWidth) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+                if ($optimalHeight > $newHeight) {
+                    $optimalHeight = $newHeight;
+                    $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+                }
+            } else if ($newHeight > $newWidth) {
+                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+                $optimalHeight = $newHeight;
+                if ($optimalWidth > $newWidth) {
+                    $optimalWidth = $newWidth;
+                    $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+                }
+            } else {
+                // *** Square being resized to a square
+                $optimalWidth = $newWidth;
+                $optimalHeight = $newHeight;
+            }
+        }
 
         return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);  
     }  
