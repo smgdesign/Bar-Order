@@ -37,7 +37,7 @@
         <input type="file" name="file" />
         <input type="hidden" name="submitted" value="TRUE" />
         <input type="hidden" name="sponsor_id" value="<?php echo (isset($id) && $id != 0) ? $id : 0; ?>" />
-        <?php if (isset($id)) {
+        <?php if ($venue_id != 'select' || $id != 0) {
         ?>
         <input type="hidden" name="venue_id" value="<?php echo $venue_id; ?>" />
         <?php
@@ -66,7 +66,7 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/sponsor/'+<?php echo $id; ?>,
+                    'url': '/web/delete/sponsor/'+<?php echo (isset($id)) ? $id : 0; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }

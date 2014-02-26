@@ -335,7 +335,7 @@ class WebController extends Controller {
                     if ($auth->level > 1) {
                         $this->set('venue_id', 'select');
                     } else {
-                        $this->set('venue_id', $session->getVar('parent_id'));
+                        $this->set('venue_id', $session->getVar('venue_id'));
                     }
                 }
                 break;
@@ -439,7 +439,7 @@ class WebController extends Controller {
                             $file['name'] = time().'-'.$file['name'];
                             if ($files->createImageResource($file['name'], $file['tmp_name'])) {
                                 $files->resizeImage(640, 160, 'rectangle');
-                                $files->saveImage(uploadDir.$file['name']);
+                                $files->saveImage(uploadDir.$file['name'], 60);
                                 $data['tbl_advert']['fields']['img'] = 'http://bar.smgdev.co.uk/img/items/'.$file['name'];
                             } else {
                                 $err[] = 'An error occurred uploading the file';
@@ -480,7 +480,7 @@ class WebController extends Controller {
                     if ($auth->level > 1) {
                         $this->set('venue_id', 'select');
                     } else {
-                        $this->set('venue_id', $session->getVar('parent_id'));
+                        $this->set('venue_id', $session->getVar('venue_id'));
                     }
                 }
                 break;

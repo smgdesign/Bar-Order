@@ -99,7 +99,7 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/menu/'+<?php echo $id; ?>,
+                    'url': '/web/delete/menu/'+<?php echo (isset($id)) ? $id : 0; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }

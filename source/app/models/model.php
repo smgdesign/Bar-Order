@@ -362,7 +362,11 @@ class Model {
                         's'=>'tbl_advert'
                     );
                     $cols = array(
-                        's'=>array('*')
+                        's'=>array('*'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 's.venue_id'))
                     );
                     $cond = array(
                         's'=>array(

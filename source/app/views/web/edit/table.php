@@ -77,7 +77,7 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/table/'+<?php echo $id; ?>,
+                    'url': '/web/delete/table/'+<?php echo (isset($id)) ? $id : 0; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }
@@ -85,7 +85,7 @@
             }
         });
         $("input[name='download_qr']").click(function() {
-            window.location.href = '/web/downloader/<?php echo $info['QR_code']; ?>/'+generateURL($("input[name='name']").val());
+            window.location.href = '/web/downloader/<?php echo (isset($info['QR_code'])) ? $info['QR_code'] : 0; ?>/'+generateURL($("input[name='name']").val());
         });
     });
     function generateURL(url) {
