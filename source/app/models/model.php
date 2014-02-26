@@ -193,7 +193,7 @@ class Model {
                 break;
         }
     }
-    public function venue($mode='list') {
+    public function venue($mode='list', $index='id') {
         switch ($mode) {
             case "list":
                 $tbl = array(
@@ -213,22 +213,143 @@ class Model {
                     )
                 );
                 $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond);
-                return $data[0];
+                $output = $data[0];
+                if ($index === true) {
+                    $output = array();
+                    foreach ($data[0] as $venue) {
+                        $output[$venue['id']] = $venue['title'];
+                    }
+                }
+                return $output;
                 break;
         }
     }
     public function location($mode='list') {
-        global $auth;
+        global $auth, $session;
         switch ($mode) {
             case "list":
-                if ($auth->level < 1) {
-                    // this means we need just the sub locations of this venue \\
-
+                if ($auth->level < 2) {
+                    $tbl = array(
+                        'l'=>'tbl_venue'
+                    );
+                    $cols = array(
+                        'l'=>array('*')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 'l.parent_id'))
+                    );
+                    $cond = array(
+                        'l'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'parent_id',
+                                'operand'=>'=',
+                                'value'=>$session->getVar('venue_id')
+                            )
+                        )
+                    );
                 } else {
-                    $cond = array();
+                    $tbl = array(
+                        'l'=>'tbl_venue'
+                    );
+                    $cols = array(
+                        'l'=>array('*'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 'l.parent_id'))
+                    );
+                    $cond = array(
+                        'l'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'parent_id',
+                                'operand'=>'!=',
+                                'value'=>0
+                            )
+                        )
+                    );
                 }
+                $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
+                if ($data[1] > 0) {
+                    $venues = array();
+                    foreach ($data[0] as $location) {
+                        if (!isset($venues[$location['venue_id']])) {
+                            $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
+                        }
+                        $venues[$location['venue_id']]['locations'][$location['id']] = $location['title'];
+                    }
+                }
+                return $venues;
                 break;
         }
-        
+    }
+    public function table($mode='list') {
+        global $auth, $session;
+        switch ($mode) {
+            case "list":
+                if ($auth->level < 2) {
+                    $tbl = array(
+                        't'=>'tbl_table'
+                    );
+                    $cols = array(
+                        't'=>array('*'),
+                        'l'=>array('id AS location_id', 'title AS location_title'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'l', 'on'=>array('l.id', '=', 't.location_id')),
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 'l.parent_id'))
+                    );
+                    $cond = array(
+                        'v'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'id',
+                                'operand'=>'=',
+                                'value'=>$session->getVar('venue_id')
+                            )
+                        )
+                    );
+                } else {
+                    $tbl = array(
+                        't'=>'tbl_table'
+                    );
+                    $cols = array(
+                        't'=>array('*'),
+                        'l'=>array('id AS location_id', 'title AS location_title'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'l', 'on'=>array('l.id', '=', 't.location_id')),
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 'l.parent_id'))
+                    );
+                    $cond = array(
+                        'l'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'parent_id',
+                                'operand'=>'!=',
+                                'value'=>0
+                            )
+                        )
+                    );
+                }
+                $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
+                if ($data[1] > 0) {
+                    $venues = array();
+                    foreach ($data[0] as $location) {
+                        if (!isset($venues[$location['venue_id']])) {
+                            $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
+                        }
+                        if (!isset($venues[$location['venue_id']]['locations'][$location['location_id']])) {
+                            $venues[$location['venue_id']]['locations'][$location['location_id']] = array('location_title'=>$location['location_title'], 'tables'=>array());
+                        }
+                        $venues[$location['venue_id']]['locations'][$location['location_id']]['tables'][$location['id']] = $location['name'];
+                    }
+                }
+                return $venues;
+                break;
+        }
     }
 }

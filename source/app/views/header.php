@@ -34,12 +34,18 @@
                         'dataType': 'json',
                         'success': function(i) {
                             if (i.status.code === 3) {
-                                var dataL = i.data.length;
-                                if (dataL > 0) {
+                                if (tgt === 'location') {
                                     var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
                                     tmpObj.append('<option value="">Please select one...</option>')
-                                    for (var x = 0; x < dataL; x++) {
-                                        tmpObj.append('<option value="'+i.data[x].id+'">'+i.data[x].title+'</option>');
+                                    var curVenue = 0;
+                                    for (var x in i.data) {
+                                        if (x !== curVenue) {
+                                            curVenue = x;
+                                            tmpObj.append('<optgroup label="'+i.data[x].venue_title+'"></optgroup>');
+                                        }
+                                        for (var y in i.data[x].locations) {
+                                            $("optgroup:last", tmpObj).append('<option value="'+y+'">'+i.data[x].locations[y]+'</option>');
+                                        }
                                     }
                                     $this.after(tmpObj);
                                     tmpObj.change(function() {
@@ -47,6 +53,43 @@
                                             window.location = '/web/edit/'+tgt+'/'+$(this).val();
                                         }
                                     });
+                                } else if (tgt === 'table') {
+                                    var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
+                                    tmpObj.append('<option value="">Please select one...</option>')
+                                    for (var x in i.data) {
+                                        var curLocation = 0;
+                                        for (var y in i.data[x].locations) {
+                                            if (y !== curLocation) {
+                                                curLocation = y;
+                                                $(tmpObj).append('<optgroup label="'+i.data[x].venue_title+' - '+i.data[x].locations[y].location_title+'"></optgroup>');
+                                            }
+                                            for (var z in i.data[x].locations[y].tables) {
+                                                $("optgroup:last", tmpObj).append('<option value="'+z+'">'+i.data[x].locations[y].tables[z]+'</option>');
+                                            }
+                                            
+                                        }
+                                    }
+                                    $this.after(tmpObj);
+                                    tmpObj.change(function() {
+                                        if ($(this).val() !== '') {
+                                            window.location = '/web/edit/'+tgt+'/'+$(this).val();
+                                        }
+                                    });
+                                } else {
+                                    var dataL = i.data.length;
+                                    if (dataL > 0) {
+                                        var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
+                                        tmpObj.append('<option value="">Please select one...</option>')
+                                        for (var x = 0; x < dataL; x++) {
+                                            tmpObj.append('<option value="'+i.data[x].id+'">'+i.data[x].title+'</option>');
+                                        }
+                                        $this.after(tmpObj);
+                                        tmpObj.change(function() {
+                                            if ($(this).val() !== '') {
+                                                window.location = '/web/edit/'+tgt+'/'+$(this).val();
+                                            }
+                                        });
+                                    }
                                 }
                             }
                         }
