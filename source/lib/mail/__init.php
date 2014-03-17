@@ -97,7 +97,8 @@ class mail {
             $items = array();
             if (count($messages) > 0) {
                 foreach($messages as $msg) {
-                    $info = $this->imap->mail_mime_to_array($msg['msgno'])['parsed'];
+                    $msgNo = $this->imap->mail_mime_to_array($msg['msgno']);
+                    $info = $msgNo['parsed'];
                     $msgText = $this->imap->get_part($msg['msgno'], "TEXT/PLAIN");
                     $msgHTML = $this->imap->get_part($msg['msgno'], "TEXT/HTML");
                     $msgAlt = $this->imap->get_part($msg['msgno'], "MULTIPART/ALTERNATIVE");

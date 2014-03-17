@@ -78,6 +78,11 @@ class ApiController extends Controller {
                         'col'=>'parent_id',
                         'operand'=>'=',
                         'value'=>0
+                    ),
+                    array(
+                        'col'=>'id',
+                        'operand'=>'=',
+                        'value'=>$session->getVar('venue_id')
                     )
                 ));
                 $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);

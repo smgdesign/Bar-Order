@@ -45,6 +45,14 @@ class db {
         } else {
             $mysqlQuery = @mysqli_query($this->dbc, $statement);
         }
+        // if the statement is an update or an insert we need to update the last_updated value \\
+        if (strstr($statement, "UPDATE") !== false || strstr($statement, "INSERT") !== false) {
+            if (debug == 'develop') {
+                $mysqlQuery = mysqli_query($this->dbc, "UPDATE tbl_config SET value=NOW() WHERE name='last_updated'") or die("<div class=\"php_error\">Query of <strong>".$statement."</strong> failed with error: ".mysqli_error($this->dbc)."</div>");
+            } else {
+                $mysqlQuery = @mysqli_query($this->dbc, "UPDATE tbl_config SET value=NOW() WHERE name='last_updated'");
+            }
+        }
         if ($state != 'id') {
             return $mysqlQuery;
         } else{
