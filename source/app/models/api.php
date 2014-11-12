@@ -11,7 +11,7 @@ class Api extends Model {
             );
             $cols = array(
                 'c'=>array('id', 'title', 'desc'),
-                'ch'=>array('menu_id')
+                'ch'=>array('menu_id', 'is_primary')
             );
             $cond = array('ch'=>array(
                     'join'=>'AND',

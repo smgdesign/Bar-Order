@@ -11,8 +11,8 @@ class ApiController extends Controller {
             if ($this->checkContinue()) {
                 $device = $auth->checkDevice();
                 if (is_array($device)) {
-                    if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override')) {
-                        if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== false) || $common->getParam('override')) {
+                    if (($device['status'] == 'new' || ($device['status'] == 'exists' && $device['sync'])) || $common->getParam('override') !== "false") {
+                        if ((!is_null($common->getParam('sync')) && $common->getParam('sync') !== "false") || $common->getParam('override') !== "false") {
                             $data = array();
                             $data['venues'] = $this->venue('list');
                             $data['locations'] = $this->location('list');
@@ -78,6 +78,11 @@ class ApiController extends Controller {
                         'col'=>'parent_id',
                         'operand'=>'=',
                         'value'=>0
+                    ),
+                    array(
+                        'col'=>'id',
+                        'operand'=>'=',
+                        'value'=>$session->getVar('venue_id')
                     )
                 ));
                 $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
@@ -189,7 +194,8 @@ class ApiController extends Controller {
                 );
                 $cols = array(
                     'm'=>array('*'),
-                    'i'=>array('id AS ingredient_id', 'title AS ingredient', 'desc AS ingredient_desc')
+                    'i'=>array('id AS ingredient_id', 'title AS ingredient', 'desc AS ingredient_desc'),
+                    'ih'=>array('required')
                 );
                 $cond = array(
                     'm'=>array(
@@ -214,7 +220,7 @@ class ApiController extends Controller {
                             $menu[$item['id']] = array('location_id'=>$item['location_id'], 'title'=>$item['title'], 'icon'=>$item['icon'], 'desc'=>$item['desc'], 'price'=>$item['price'], 'ingredients'=>array(), 'categories'=>array());
                         }
                         if (!is_null($item['ingredient_id'])) {
-                            $menu[$item['id']]['ingredients'][] = array('id'=>$item['ingredient_id'], 'title'=>$item['ingredient'], 'desc'=>$item['ingredient_desc']);
+                            $menu[$item['id']]['ingredients'][] = array('id'=>$item['ingredient_id'], 'title'=>$item['ingredient'], 'desc'=>$item['ingredient_desc'], 'required'=>$item['required']);
                         }
                     }
                 }
@@ -226,6 +232,9 @@ class ApiController extends Controller {
                             $menu[$cat['menu_id']]['categories'] = array();
                         }
                         $menu[$cat['menu_id']]['categories'][] = array('id'=>$cat['id'], 'title'=>$cat['title'], 'desc'=>$cat['desc']);
+                        if ($cat['is_primary'] == 1) {
+                            $menu[$cat['menu_id']]['primary'] = $cat['id'];
+                        }
                     }
                 }
                 /*$locations = array();
@@ -284,7 +293,7 @@ class ApiController extends Controller {
         global $auth, $db, $common, $session;
         if (!$this->checkContinue()) return;
         $device = $auth->getDevice();
-        if (is_array($device)) {
+        if (is_array($device) && !is_null($session->getVar('table_id'))) {
             $deviceID = $device['id'];
             switch ($action) {
                 case "list":
@@ -331,7 +340,11 @@ class ApiController extends Controller {
                         $orders = array();
                         foreach ($data[0] as $item) {
                             if (!isset($orders[$item['id']])) {
-                                $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$item['time_ordered'], 'time_completed'=>$item['time_completed'], 'table'=>$item['name'], 'items'=>array());
+                                $timeOrdered = new DateTime($item['time_ordered'].' UTC');
+                                $timeOrdered->setTimezone(new DateTimeZone('Europe/London'));
+                                $timeCompleted = new DateTime($item['time_completed']. 'UTC');
+                                $timeCompleted->setTimezone(new DateTimeZone('Europe/London'));
+                                $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$timeOrdered->format('Y M d - H:i'), 'time_completed'=>$timeCompleted->format('Y M d - H:i'), 'table'=>$item['name'], 'items'=>array());
                             }
                             
                             if (isset($orders[$item['id']]['items'][$item['menu_id']])) {
@@ -341,7 +354,7 @@ class ApiController extends Controller {
                             }
                         }
                         if (!empty($orders)) {
-                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$orders, 'lastSync'=>$last->format('Y-m-d H:i:s'));
+                            $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'data'=>$orders, 'lastSync'=>$last->format('Y M d - H:i'));
                         } else {
                             $this->json = array('status'=>\errors\codes::$__EMPTY, 'message'=>'Orders were found, but not matching criteria.', 'query'=>array($tbl, $joins, $cols, $cond));
                         }
@@ -363,14 +376,17 @@ class ApiController extends Controller {
                                     if (is_int($orderID)) {
                                         foreach ($items as $id=>$item) {
                                             $i = 0;
-                                            while ($i < $item) {
-                                                $orderItems[] = array('menu_id'=>$id, 'status'=>0, 'order_id'=>$orderID);
-                                                $i++;
+                                            $itemObj = json_decode($item);
+                                            if ($itemObj !== false) {
+                                                while ($i < $itemObj->quantity) {
+                                                    $orderItems[] = array('menu_id'=>$id, 'status'=>0, 'order_id'=>$orderID, 'without'=>json_encode($itemObj->ingredients));
+                                                    $i++;
+                                                }
                                             }
                                         }
                                         if (!empty($orderItems)) {
                                             foreach ($orderItems as $orderItem) {
-                                                $db->dbQuery("INSERT INTO tbl_order_item (menu_id, status, order_id) VALUES (".implode(', ', $orderItem).")");
+                                                $db->dbQuery("INSERT INTO tbl_order_item (".implode(', ', array_keys($orderItem)).") VALUES ('".implode("', '", $orderItem)."')");
                                             }
                                             $this->json = array('status'=>  \errors\codes::$__SUCCESS, 'order_id'=>$orderID, 'order_status'=>0);
                                         } else {
@@ -394,7 +410,7 @@ class ApiController extends Controller {
                     break;
                 case "status":
                     if (!is_null($common->getParam('id'))) {
-                        $order = $this->Api->orders('get', $common->getParam('id'));
+                        $order = $this->Api->orders('get', $deviceID, 'device');
                         if (!empty($order)) {
                             $this->json = array('status'=>  \errors\codes::$__FOUND, 'data'=>array('status'=>$order['status'], 'items'=>$order['items']));
                         } else {

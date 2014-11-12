@@ -40,6 +40,7 @@
             <?php
             $location = $this->Web->location('list');
             $curID = 0;
+            $output = '';
             foreach ($location as $venueID=>$loc) {
                 if ($venueID !== $curID) {
                     $output .= '<optgroup label="'.$loc['venue_title'].'">';
@@ -57,11 +58,16 @@
         </select>
         <?php
         }
+        if (!empty($info['QR_code'])) {
+            echo '<br /><input type="hidden" name="QR_code" value="'.$info['QR_code'].'" />';
+            echo '<img src="/img/items/'.$info['QR_code'].'" alt="QR_code" />';
+            echo '<br /><input type="button" name="download_qr" value="Download QR Code" class="form_btn" /><br /><br />';
+        }
         ?>
         <div class="clear"></div>
         <input type="submit" name="add" value="<?php echo ($action == 'add') ? 'Create' : 'Update'; ?>" id="form_btn" />
         <?php if (isset($id) && $id != 0) {
-            echo '<input type="button" name="delete" value="Delete" id="form_btn" />';
+            echo '<input type="button" name="delete" value="Delete" class="form_btn" />';
         }
         ?>
     </form>
@@ -72,12 +78,18 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/venue/'+<?php echo $id; ?>,
+                    'url': '/web/delete/table/'+<?php echo (isset($id)) ? $id : 0; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }
                 });
             }
         });
+        $("input[name='download_qr']").click(function() {
+            window.location.href = '/web/downloader/<?php echo (isset($info['QR_code'])) ? $info['QR_code'] : 0; ?>/'+generateURL($("input[name='name']").val());
+        });
     });
+    function generateURL(url) {
+        return url.replace("#", "_").replace(" ", "_").replace("'", "_").replace("\"", "").replace("__", "_").replace("&", "and").replace("/", "_").replace("\\", "_").replace("?", "");
+    }
 </script>

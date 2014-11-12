@@ -75,6 +75,25 @@
                                             window.location = '/web/edit/'+tgt+'/'+$(this).val();
                                         }
                                     });
+                                } else if (tgt === 'sponsor') {
+                                    var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
+                                    tmpObj.append('<option value="">Please select one...</option>')
+                                    var curVenue = 0;
+                                    for (var x in i.data) {
+                                        if (x !== curVenue) {
+                                            curVenue = x;
+                                            tmpObj.append('<optgroup label="'+i.data[x].venue_title+'"></optgroup>');
+                                        }
+                                        for (var y in i.data[x].sponsors) {
+                                            $("optgroup:last", tmpObj).append('<option value="'+y+'">'+i.data[x].sponsors[y]+'</option>');
+                                        }
+                                    }
+                                    $this.after(tmpObj);
+                                    tmpObj.change(function() {
+                                        if ($(this).val() !== '') {
+                                            window.location = '/web/edit/'+tgt+'/'+$(this).val();
+                                        }
+                                    });
                                 } else {
                                     var dataL = i.data.length;
                                     if (dataL > 0) {
@@ -134,6 +153,14 @@
                         <li><a href="/web/edit/location">Add location</a></li>
                         <li><a href="#table" class="list">Edit table</a></li>
                         <li><a href="/web/edit/table">Add table</a></li>
+                        <li><a href="#table" class="list">QR</a></li>
+                    </ul>
+                </li>
+                <li class="sub_menu">
+                    <a href="/web/items/sponsor">Sponsors</a>
+                    <ul>
+                        <li class="first"><a href="#sponsor" class="list">Edit sponsor</a></li>
+                        <li><a href="/web/edit/sponsor">Add sponsor</a></li>
                     </ul>
                 </li>
                 <li><a href="/auth/logout">Logout</a></li>

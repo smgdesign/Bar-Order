@@ -120,7 +120,7 @@ input[type='file'] {
     font-size: 1.3em;
     border: 1px solid #aaaaaa;
 }
-#login_btn, #form_btn {
+#login_btn, .form_btn, #form_btn {
     background: #000000;
     border: none;
     padding: 0;
@@ -172,18 +172,21 @@ input[type='file'] {
     background: #f3fbc1;
 }
 .order_list tr.status_3, .order_items td.status_3 {
-    background: #cdf8c0;
+    background: #dffbc1;
 }
 .order_list tr.status_4, .order_items td.status_4 {
+    background: #cdf8c0;
+}
+.order_list tr.status_5, .order_items td.status_5 {
     background: #8c0000;
 }
 .order_list tr td, .order_list tr td select, .order_items tr td, .order_items tr td select {
     color: #444444;
 }
-.order_list tr.status_4 td, .order_items td.status_4 {
+.order_list tr.status_5 td, .order_items td.status_5 {
     color: #ffffff;
 }
-.order_list tr.status_4 td select, .order_items td.status_4 select {
+.order_list tr.status_5 td select, .order_items td.status_5 select {
     color: #ffffff;
     background-position: right bottom;
 }

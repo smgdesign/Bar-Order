@@ -9,7 +9,7 @@ class Model {
     public function __construct() {
         $this->_model = get_class($this);
     }
-    public function orders($mode='list', $id=0) {
+    public function orders($mode='list', $id=0, $type='normal') {
         global $common;
         switch ($mode) {
             case "list":
@@ -50,7 +50,7 @@ class Model {
                             array(
                                 'col'=>'time_ordered',
                                 'operand'=>'>=',
-                                'value'=>"'{$last->format('Y-m-d H:i:s')}'"
+                                'value'=>"'{$last->format('Y M d - H:i')}'"
                             )
                         );
                         $setSync = true;
@@ -61,7 +61,11 @@ class Model {
                         $orders = array();
                         foreach ($data[0] as $item) {
                             if (!isset($orders[$item['id']])) {
-                                $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$item['time_ordered'], 'time_completed'=>$item['time_completed'], 'table'=>$item['name'], 'items'=>array(), 'total'=>0);
+                                $timeOrdered = new DateTime($item['time_ordered'].' UTC');
+                                $timeOrdered->setTimezone(new DateTimeZone('Europe/London'));
+                                $timeCompleted = new DateTime($item['time_completed']. 'UTC');
+                                $timeCompleted->setTimezone(new DateTimeZone('Europe/London'));
+                                $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$timeOrdered->format('Y M d - H:i'), 'time_completed'=>$timeCompleted->format('Y M d - H:i'), 'table'=>$item['name'], 'items'=>array(), 'total'=>0);
                             }
                             if (!empty($item['menu_id'])) {
                                 $orders[$item['id']]['items'][] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status']);
@@ -101,6 +105,60 @@ class Model {
                         'o'=>array(
                             'join'=>'AND',
                             array(
+                                'col'=>(($type == 'device') ? 'device_id' : 'id'),
+                                'operand'=>'=',
+                                'value'=>$id
+                            )
+                        )
+                    );
+                    $order = array('ORDER BY o.status ASC');
+                    $data = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond, $order);
+                    if ($data[1] > 0) {
+                        $orders = array();
+                        foreach ($data[0] as $item) {
+                            if (!isset($orders[$item['id']])) {
+                                $timeOrdered = new DateTime($item['time_ordered'].' UTC');
+                                $timeOrdered->setTimezone(new DateTimeZone('Europe/London'));
+                                $timeCompleted = new DateTime($item['time_completed']. 'UTC');
+                                $timeCompleted->setTimezone(new DateTimeZone('Europe/London'));
+                                $orders[$item['id']] = array('status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$timeOrdered->format('Y M d - H:i'), 'time_completed'=>$timeCompleted->format('Y M d - H:i'), 'table'=>$item['name'], 'items'=>array(), 'total'=>0);
+                            }
+                            if (!empty($item['menu_id'])) {
+                                if (isset($orders[$item['id']]['items'][$item['menu_id']])) {
+                                    $orders[$item['id']]['items'][$item['menu_id']]['qty'] = $orders['items'][$item['menu_id']]['qty']+1;
+                                } else {
+                                    $orders[$item['id']]['items'][$item['menu_id']] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status'], 'qty'=>1);
+                                }
+                                
+                                $orders[$item['id']]['total'] = $orders[$item['id']]['total']+$item['price'];
+                            }
+                        }
+                        return $orders;
+                    } else {
+                        return array();
+                    }
+                }
+                break;
+            case "view":
+                if ($id !== 0) {
+                    $tbl = array(
+                        'o'=>'tbl_order'
+                    );
+                    $joins = array(
+                        array('table'=>'tbl_order_item', 'as'=>'oi', 'on'=>array('oi.order_id', '=', 'o.id')),
+                        array('table'=>'tbl_menu', 'as'=>'m', 'on'=>array('m.id', '=', 'oi.menu_id')),
+                        array('table'=>'tbl_table', 'as'=>'t', 'on'=>array('t.id', '=', 'o.table_id'))
+                    );
+                    $cols = array(
+                        'o'=>array('*'),
+                        'oi'=>array('status AS item_status', 'without'),
+                        'm'=>array('id AS menu_id', 'title', 'price'),
+                        't'=>array('name')
+                    );
+                    $cond = array(
+                        'o'=>array(
+                            'join'=>'AND',
+                            array(
                                 'col'=>'id',
                                 'operand'=>'=',
                                 'value'=>$id
@@ -113,13 +171,17 @@ class Model {
                         $orders = array();
                         foreach ($data[0] as $item) {
                             if (empty($orders)) {
-                                $orders = array('id'=>$item['id'], 'status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$item['time_ordered'], 'time_completed'=>$item['time_completed'], 'table'=>$item['name'], 'items'=>array(), 'total'=>0);
+                                $timeOrdered = new DateTime($item['time_ordered'].' UTC');
+                                $timeOrdered->setTimezone(new DateTimeZone('Europe/London'));
+                                $timeCompleted = new DateTime($item['time_completed']. 'UTC');
+                                $timeCompleted->setTimezone(new DateTimeZone('Europe/London'));
+                                $orders = array('id'=>$item['id'], 'status'=>$item['status'], 'instruction'=>$item['instructions'], 'time_ordered'=>$timeOrdered->format('Y M d - H:i'), 'time_completed'=>$timeCompleted->format('Y M d - H:i'), 'table'=>$item['name'], 'items'=>array(), 'total'=>0);
                             }
                             if (!empty($item['menu_id'])) {
-                                if (isset($orders['items'][$item['menu_id']])) {
+                                if (isset($orders['items'][$item['menu_id']]) && $item['without'] === $orders['items'][$item['menu_id']]['raw_without']) {
                                     $orders['items'][$item['menu_id']]['qty'] = $orders['items'][$item['menu_id']]['qty']+1;
                                 } else {
-                                    $orders['items'][$item['menu_id']] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status'], 'qty'=>1);
+                                    $orders['items'][$item['menu_id']] = array('id'=>$item['menu_id'], 'title'=>$item['title'], 'price'=>$item['price'], 'status'=>$item['item_status'], 'qty'=>1, 'raw_without'=>$item['without'], 'without'=>$this->ingredients('selected', json_decode($item['without'])));
                                 }
                                 
                                 $orders['total'] = $orders['total']+$item['price'];
@@ -177,6 +239,35 @@ class Model {
                 $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols);
                 return $data[0];
                 break;
+            case "selected":
+                $arr = func_get_arg(1);
+                $ing = array();
+                if (is_array($arr) && !empty($arr)) {
+                    $tbl = array(
+                        'i'=>'tbl_ingredient'
+                    );
+                    $cols = array(
+                        'i'=>array('title')
+                    );
+                    $cond = array(
+                        'i'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'id',
+                                'operand'=>'IN',
+                                'value'=>$arr
+                            )
+                        )
+                    );
+                    $data = \data\collection::buildQuery("SELECT", $tbl, array(), $cols, $cond);
+                    if ($data[1] > 0) {
+                        foreach ($data[0] as $item) {
+                            $ing[] = $item['title'];
+                        }
+                    }
+                }
+                return $ing;
+                break;
         }
     }
     public function categories($mode='list') {
@@ -228,6 +319,7 @@ class Model {
         global $auth, $session;
         switch ($mode) {
             case "list":
+                $venues = array();
                 if ($auth->level < 2) {
                     $tbl = array(
                         'l'=>'tbl_venue'
@@ -272,7 +364,6 @@ class Model {
                 }
                 $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
                 if ($data[1] > 0) {
-                    $venues = array();
                     foreach ($data[0] as $location) {
                         if (!isset($venues[$location['venue_id']])) {
                             $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
@@ -288,6 +379,7 @@ class Model {
         global $auth, $session;
         switch ($mode) {
             case "list":
+                $venues = array();
                 if ($auth->level < 2) {
                     $tbl = array(
                         't'=>'tbl_table'
@@ -337,7 +429,6 @@ class Model {
                 }
                 $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
                 if ($data[1] > 0) {
-                    $venues = array();
                     foreach ($data[0] as $location) {
                         if (!isset($venues[$location['venue_id']])) {
                             $venues[$location['venue_id']] = array('venue_title'=>$location['venue_title'], 'locations'=>array());
@@ -346,6 +437,58 @@ class Model {
                             $venues[$location['venue_id']]['locations'][$location['location_id']] = array('location_title'=>$location['location_title'], 'tables'=>array());
                         }
                         $venues[$location['venue_id']]['locations'][$location['location_id']]['tables'][$location['id']] = $location['name'];
+                    }
+                }
+                return $venues;
+                break;
+        }
+    }
+    public function sponsor($mode='list') {
+        global $auth, $session;
+        switch ($mode) {
+            case "list":
+                $venues = array();
+                if ($auth->level < 2) {
+                    $tbl = array(
+                        's'=>'tbl_advert'
+                    );
+                    $cols = array(
+                        's'=>array('*'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 's.venue_id'))
+                    );
+                    $cond = array(
+                        's'=>array(
+                            'join'=>'AND',
+                            array(
+                                'col'=>'venue_id',
+                                'operand'=>'=',
+                                'value'=>$session->getVar('venue_id')
+                            )
+                        )
+                    );
+                } else {
+                    $tbl = array(
+                        's'=>'tbl_advert'
+                    );
+                    $cols = array(
+                        's'=>array('*'),
+                        'v'=>array('id AS venue_id', 'title AS venue_title')
+                    );
+                    $join = array(
+                        array('table'=>'tbl_venue', 'as'=>'v', 'on'=>array('v.id', '=', 's.venue_id'))
+                    );
+                    $cond = array();
+                }
+                $data = \data\collection::buildQuery("SELECT", $tbl, $join, $cols, $cond);
+                if ($data[1] > 0) {
+                    foreach ($data[0] as $sponsor) {
+                        if (!isset($venues[$sponsor['venue_id']])) {
+                            $venues[$sponsor['venue_id']] = array('venue_title'=>$sponsor['venue_title'], 'sponsors'=>array());
+                        }
+                        $venues[$sponsor['venue_id']]['sponsors'][$sponsor['id']] = $sponsor['link'];
                     }
                 }
                 return $venues;

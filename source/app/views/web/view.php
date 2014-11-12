@@ -34,7 +34,7 @@ $odd = true;
 foreach ($order['items'] as $id=>$item) {
     ?>
         <tr id="item_<?php echo $id; ?>" class="<?php echo ($odd) ? 'row_odd' : 'row_even'; ?>">
-            <td><?php echo $item['title']; ?></td>
+            <td><?php echo $item['title'].((!empty($item['without'])) ? '<br /><small>Without: '.implode(', ', $item['without']).'</small>' : ''); ?></td>
             <td class="status_<?php echo $item['status']; ?>"><input type="hidden" name="order_id" value="<?php echo $order['id']; ?>" /><input type="hidden" name="item_id" value="<?php echo $id; ?>" /><select name="item_status">
                     <?php
                     echo $this->selectList($this->orderStatuses(), $item['status']);

@@ -35,7 +35,7 @@
             <textarea name="desc" placeholder="Description"><?php echo (isset($info['desc'])) ? $info['desc'] : ''; ?></textarea>
             <?php
             if (isset($info['icon'])) {
-                echo '<img src="'.$info['icon'].'" />';
+                echo '<img src="'.$info['icon'].'" width="400" />';
             }
             ?>
             <input type="file" name="icon" />
@@ -48,8 +48,10 @@
                 foreach ($ingredients as $ingredient) {
                     ?>
                 <li class="ingredient">
-                    <input type="checkbox" name="ingredient[<?php echo $ingredient['id']; ?>]" id="ingredient_<?php echo $ingredient['id']; ?>" value="1" <?php echo (isset($info['ingredients']) && array_search($ingredient['id'], $info['ingredients']) !== false) ? 'checked="checked"' : ''; ?> />
+                    <input type="checkbox" name="ingredient[<?php echo $ingredient['id']; ?>]" id="ingredient_<?php echo $ingredient['id']; ?>" value="1" <?php echo (isset($info['ingredients']) && array_key_exists($ingredient['id'], $info['ingredients']) !== false) ? 'checked="checked"' : ''; ?> />
                     <label for="ingredient_<?php echo $ingredient['id']; ?>" title="<?php echo $ingredient['desc']; ?>"><?php echo $ingredient['title']; ?></label>
+                    <input type="checkbox" name="ingredient_req[<?php echo $ingredient['id']; ?>]" id="ingredient_req_<?php echo $ingredient['id']; ?>" value="1" <?php echo (isset($info['ingredients']) && array_key_exists($ingredient['id'], $info['ingredients']) !== false && $info['ingredients'][$ingredient['id']] == 1) ? 'checked="checked"' : ''; ?> />
+                    <label for="ingredient_req_<?php echo $ingredient['id']; ?>" title="Required"><small>Required?</small></label>
                 </li>
                 <?php
                 }
@@ -78,7 +80,7 @@
         </div>
         <input type="submit" name="add" value="<?php echo ($action == 'add') ? 'Create' : 'Update'; ?>" id="form_btn" />
         <?php if (isset($id) && $id != 0) {
-            echo '<input type="button" name="delete" value="Delete" id="form_btn" />';
+            echo '<input type="button" name="delete" value="Delete" class="form_btn" />';
         }
         ?>
     </form>
@@ -87,7 +89,7 @@
     $(function() {
         var inc = 0;
         $(".add_new", ".ingredient_list").click(function() {
-            $(this).before('<li class="ingredient"><input type="checkbox" name="ingredient[-1]['+inc+']" value="1" checked="checked" /><input type="text" name="ingredient_name['+inc+']" placeholder="Ingredient" /><br /><textarea name="ingredient_desc['+inc+']" placeholder="Description"></textarea></li>');
+            $(this).before('<li class="ingredient"><input type="checkbox" name="ingredient[-1]['+inc+']" value="1" checked="checked" /><input type="text" name="ingredient_name['+inc+']" placeholder="Ingredient" /><br /><textarea name="ingredient_desc['+inc+']" placeholder="Description"></textarea><input type="checkbox" name="ingredient_req['+inc+']" id="ingredient_req_'+inc+'" value="1" /><label for="ingredient_req_'+inc+'" title="Required"><small>Required?</small></label></li>');
             inc++;
         });
         var incCat = 0;
@@ -99,7 +101,7 @@
             var c = confirm('Are you sure you wish to delete this item?');
             if (c) {
                 $.ajax({
-                    'url': '/web/delete/menu/'+<?php echo $id; ?>,
+                    'url': '/web/delete/menu/'+<?php echo (isset($id)) ? $id : 0; ?>,
                     'success': function() {
                         window.location.href = "/";
                     }
