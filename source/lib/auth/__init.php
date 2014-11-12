@@ -120,6 +120,9 @@ class authentication {
                     $venueID = 0;
                 }
                 $device = $this->getDevice();
+                require_once ROOT . DS . "lib" . DS . "mail" . DS . "__init.php";
+                $mail = new mail();
+                
                 if (is_array($device)) {
                     $sync = new DateTime($device['last_sync']);
                     if ($sync !== false) {
@@ -129,6 +132,8 @@ class authentication {
                                 if ($device['venue_id'] != $venueID) {
                                     // need to insert as not been here before \\
                                     $devID = $db->dbQuery("INSERT INTO tbl_device (name, ip_addr, UUID, venue_id) VALUES ('$machineName', $ipAddr, '{$common->getParam('UUID')}', $venueID)", 'id');
+                                    $mail->sendMail("richard.wilson@smgdesign.org", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
+                                    $mail->sendMail("jamesastubbs@me.com", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
                                     return array('status'=>'new', 'sync'=>true, 'device_id'=>$devID);
                                 } else {
                                     $last = new DateTime($dbconf['last_updated']);
@@ -142,17 +147,23 @@ class authentication {
                             } else {
                                 // now insert this in the db \\
                                 $devID = $db->dbQuery("INSERT INTO tbl_device (name, ip_addr, UUID, venue_id) VALUES ('$machineName', $ipAddr, '{$common->getParam('UUID')}', $venueID)", 'id');
+                                $mail->sendMail("richard.wilson@smgdesign.org", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
+                                $mail->sendMail("jamesastubbs@me.com", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
                                 return array('status'=>'new', 'sync'=>true, 'device_id'=>$devID);
                             }
                         }
                     } else {
                         // now insert this in the db \\
                         $devID = $db->dbQuery("INSERT INTO tbl_device (name, ip_addr, UUID, venue_id) VALUES ('$machineName', $ipAddr, '{$common->getParam('UUID')}', $venueID)", 'id');
+                        $mail->sendMail("richard.wilson@smgdesign.org", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
+                        $mail->sendMail("jamesastubbs@me.com", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
                         return array('status'=>'new', 'sync'=>true, 'device_id'=>$devID);
                     }
                 } else {
                     // now insert this in the db \\
                     $devID = $db->dbQuery("INSERT INTO tbl_device (name, ip_addr, UUID, venue_id) VALUES ('$machineName', $ipAddr, '{$common->getParam('UUID')}', $venueID)", 'id');
+                    $mail->sendMail("richard.wilson@smgdesign.org", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
+                    $mail->sendMail("jamesastubbs@me.com", "A new device has registered on the Bar App", "template.html", array('msg'=>'A device with IP: '.$common->getParam('REMOTE_ADDR', 'server').' has registered on the Bar App.'), "online@smgdev.co.uk", "Bar App", "online@smgdev.co.uk", "vwge%3ab2L", "mail.smgdev.co.uk");
                     return array('status'=>'new', 'sync'=>true, 'device_id'=>$devID);
                 }
             } else {

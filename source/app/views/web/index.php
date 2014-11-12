@@ -14,7 +14,7 @@
         if (!empty($orders)) {
             foreach ($orders as $id=>$order) {
                 ?>
-            <tr id="order_<?php echo $id; ?>" class="status_<?php echo $order['status']; ?>">
+            <tr class="status_<?php echo $order['status']; ?>">
                 <td align="center" width="60" class="order_id"><?php echo $id; ?></td>
                 <td align="center" width="100"><?php echo $order['table']; ?></td>
                 <td class="order_status_select"><input type="hidden" name="order_id" value="<?php echo $id; ?>" /><select name="order_status">

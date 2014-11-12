@@ -163,6 +163,13 @@
                         <li><a href="/web/edit/sponsor">Add sponsor</a></li>
                     </ul>
                 </li>
+                <li class="sub_menu">
+                    <a href="/web/items/sponsor">Sponsors</a>
+                    <ul>
+                        <li class="first"><a href="#sponsor" class="list">Edit sponsor</a></li>
+                        <li><a href="/web/edit/sponsor">Add sponsor</a></li>
+                    </ul>
+                </li>
                 <li><a href="/auth/logout">Logout</a></li>
                 <?php
                 }

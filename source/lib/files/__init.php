@@ -55,20 +55,19 @@ class files {
   
         // *** Get optimal width and height - based on $option  
         $optionArray = $this->getDimensions($newWidth, $newHeight, strtolower($option));  
-        $optimalWidth  = $optionArray['optimalWidth'];  
-        $optimalHeight = $optionArray['optimalHeight'];  
+        $optimalWidth  = round($optionArray['optimalWidth']);
+        $optimalHeight = round($optionArray['optimalHeight']);  
         // *** Resample - create image canvas of x, y size  
-        if ($option == 'square') {
-            if ($optimalWidth > $optimalHeight) {
-                $this->imageResized = imagecreatetruecolor($optimalWidth, $optimalWidth);
-                $white = imagecolorallocate($this->imageResized, 255, 255, 255);
-                imagefill($this->imageResized, 0, 0, $white);
-                imagecopyresampled($this->imageResized, $this->img, 0, (($optimalWidth-$optimalHeight)/2), 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);  
+        if ($option == 'square' || $option == 'rectangle') {
+            $this->imageResized = imagecreatetruecolor($newWidth, $newHeight);
+            $white = imagecolorallocate($this->imageResized, 255, 255, 255);
+            imagefill($this->imageResized, 0, 0, $white);
+            if ($optimalWidth < $newWidth) {
+                imagecopyresampled($this->imageResized, $this->img, round(($newWidth-$optimalWidth)/2), 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);  
+            } else if ($optimalHeight < $newHeight) {
+                imagecopyresampled($this->imageResized, $this->img, 0, round(($newHeight-$optimalHeight)/2), 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);  
             } else {
-                $this->imageResized = imagecreatetruecolor($optimalHeight, $optimalHeight);
-                $white = imagecolorallocate($this->imageResized, 255, 255, 255);
-                imagefill($this->imageResized, 0, 0, $white);
-                imagecopyresampled($this->imageResized, $this->img, (($optimalHeight-$optimalWidth)/2), 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);  
+                imagecopyresampled($this->imageResized, $this->img, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);  
             }
         } else {
             $this->imageResized = imagecreatetruecolor($optimalWidth, $optimalHeight);
@@ -99,6 +98,7 @@ class files {
                 break;  
             case 'auto':  
             case 'square':
+            case 'rectangle':
                 $optionArray = $this->getSizeByAuto($newWidth, $newHeight);  
                 $optimalWidth = $optionArray['optimalWidth'];  
                 $optimalHeight = $optionArray['optimalHeight'];  
@@ -123,26 +123,42 @@ class files {
         return $newHeight;  
     }  
 
-    private function getSizeByAuto($newWidth, $newHeight) {  
-        if ($this->height < $this->width) {  
-            $optimalWidth = $newWidth;  
-            $optimalHeight= $this->getSizeByFixedWidth($newWidth);  
-        } elseif ($this->height > $this->width) {  
-            $optimalWidth = $this->getSizeByFixedHeight($newHeight);  
-            $optimalHeight= $newHeight;  
-        } else {  
-            if ($newHeight < $newWidth) {  
-                $optimalWidth = $newWidth;  
-                $optimalHeight= $this->getSizeByFixedWidth($newWidth);  
-            } else if ($newHeight > $newWidth) {  
-                $optimalWidth = $this->getSizeByFixedHeight($newHeight);  
-                $optimalHeight= $newHeight;  
-            } else {  
-                // *** Sqaure being resized to a square  
-                $optimalWidth = $newWidth;  
-                $optimalHeight= $newHeight;  
-            }  
-        }  
+    private function getSizeByAuto($newWidth, $newHeight) {
+        if ($this->height < $this->width) {
+            $optimalWidth = $newWidth;
+            $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+            if ($optimalHeight > $newHeight) {
+                $optimalHeight = $newHeight;
+                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+            }
+        } elseif ($this->height > $this->width) {
+            $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+            $optimalHeight = $newHeight;
+            if ($optimalWidth > $newWidth) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+            }
+        } else {
+            if ($newHeight < $newWidth) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+                if ($optimalHeight > $newHeight) {
+                    $optimalHeight = $newHeight;
+                    $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+                }
+            } else if ($newHeight > $newWidth) {
+                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+                $optimalHeight = $newHeight;
+                if ($optimalWidth > $newWidth) {
+                    $optimalWidth = $newWidth;
+                    $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+                }
+            } else {
+                // *** Square being resized to a square
+                $optimalWidth = $newWidth;
+                $optimalHeight = $newHeight;
+            }
+        }
 
         return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);  
     }  
