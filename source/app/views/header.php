@@ -94,6 +94,28 @@
                                             window.location = '/web/edit/'+tgt+'/'+$(this).val();
                                         }
                                     });
+                                } else if (tgt === 'menu') {
+                                    var tmpObj = $('<select name="'+tgt+'_list" style="position: absolute;"></select>');
+                                    tmpObj.append('<option value="">Please select one...</option>')
+                                    for (var x in i.data) {
+                                        var curLocation = 0;
+                                        for (var y in i.data[x].locations) {
+                                            if (y !== curLocation) {
+                                                curLocation = y;
+                                                $(tmpObj).append('<optgroup label="'+i.data[x].venue_title+' - '+i.data[x].locations[y].location_title+'"></optgroup>');
+                                            }
+                                            for (var z in i.data[x].locations[y].menu) {
+                                                $("optgroup:last", tmpObj).append('<option value="'+z+'">'+i.data[x].locations[y].menu[z]+'</option>');
+                                            }
+                                            
+                                        }
+                                    }
+                                    $this.after(tmpObj);
+                                    tmpObj.change(function() {
+                                        if ($(this).val() !== '') {
+                                            window.location = '/web/edit/'+tgt+'/'+$(this).val();
+                                        }
+                                    });
                                 } else {
                                     var dataL = i.data.length;
                                     if (dataL > 0) {
@@ -153,6 +175,7 @@
                         <li><a href="/web/edit/location">Add location</a></li>
                         <li><a href="#table" class="list">Edit table</a></li>
                         <li><a href="/web/edit/table">Add table</a></li>
+                        <li><a href="#table" class="list">QR</a></li>
                     </ul>
                 </li>
                 <li class="sub_menu">

@@ -80,7 +80,7 @@ class Controller {
                 echo json_encode($this->json);
             }
         }
-        if ($common->isPage) {
+        if (is_object($common) && $common->isPage) {
             $this->_template->render();
         }
     }

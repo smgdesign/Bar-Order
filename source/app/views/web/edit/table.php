@@ -40,6 +40,7 @@
             <?php
             $location = $this->Web->location('list');
             $curID = 0;
+            $output = '';
             foreach ($location as $venueID=>$loc) {
                 if ($venueID !== $curID) {
                     $output .= '<optgroup label="'.$loc['venue_title'].'">';

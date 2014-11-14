@@ -142,19 +142,11 @@ class files {
             if ($newHeight < $newWidth) {
                 $optimalWidth = $newWidth;
                 $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-                if ($optimalHeight > $newHeight) {
-                    $optimalHeight = $newHeight;
-                    $optimalWidth = $this->getSizeByFixedHeight($newHeight);
-                }
             } else if ($newHeight > $newWidth) {
                 $optimalWidth = $this->getSizeByFixedHeight($newHeight);
                 $optimalHeight = $newHeight;
-                if ($optimalWidth > $newWidth) {
-                    $optimalWidth = $newWidth;
-                    $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-                }
             } else {
-                // *** Square being resized to a square
+                // *** Sqaure being resized to a square
                 $optimalWidth = $newWidth;
                 $optimalHeight = $newHeight;
             }
@@ -192,7 +184,7 @@ class files {
         $this->imageResized = imagecreatetruecolor($newWidth , $newHeight);  
         imagecopyresampled($this->imageResized, $crop , 0, 0, $cropStartX, $cropStartY, $newWidth, $newHeight , $newWidth, $newHeight);  
     }
-    public function saveImage($savePath, $imageQuality="100") {  
+    public function saveImage($savePath, $imageQuality="60") {  
         // *** Get extension  
         $ext = pathinfo($savePath);  
         switch(strtolower($ext['extension'])) {  

@@ -28,6 +28,10 @@
     <form action="/web/edit/venue" method="post" enctype="multipart/form-data">
         <h2><?php echo (($action == 'add') ? 'Add' : 'Edit'); ?> venue</h2>
         <input type="text" name="title" id="title" placeholder="Title" <?php echo (isset($info['title'])) ? 'value="'.$info['title'].'"' : ''; ?> />
+        <?php
+        echo (isset($info['image'])) ? '<br /><img src="'.$info['image'].'" /><br />' : '<br />';
+        ?>
+        <input type="file" name="image" placeholder="Image" />
         <div class="clear"></div>
         <input type="hidden" name="submitted" value="TRUE" />
         <input type="hidden" name="venue_id" value="<?php echo (isset($id) && $id != 0) ? $id : 0; ?>" />

@@ -12,6 +12,7 @@ class WebController extends Controller {
         $common->isPage = true;
     }
     public function index() {
+        global $db;
         $this->level = 1;
         if (!$this->checkWebContinue()) return;
         $this->_template->headIncludes[] = '<script type="text/javascript" src="/js/modal.popup.js"></script>';
@@ -55,7 +56,7 @@ class WebController extends Controller {
         if (!$this->checkWebContinue()) return;
         $this->_template->xhr = true;
         if (!empty($id)) {
-            $this->set('order', $this->Web->orders('get', $id));
+            $this->set('order', $this->Web->orders('view', $id));
         } else {
             $this->set('error', 'You must specify an order');
         }
@@ -113,8 +114,8 @@ class WebController extends Controller {
                             require_once ROOT . DS . 'lib' . DS . 'files' . DS . '__init.php';
                             $files = new files();
                             if ($files->createImageResource($file['name'], $file['tmp_name'])) {
-                                $files->resizeImage(200, 200, 'square');
-                                $files->saveImage(uploadDir.$file['name']);
+                                $files->resizeImage(960, 528, 'crop');
+                                $files->saveImage(uploadDir.'items'.DS.$file['name']);
                                 $data['tbl_menu']['fields']['icon'] = 'http://bar.smgdev.co.uk/img/items/'.$file['name'];
                             } else {
                                 $err[] = 'An error occurred uploading the file';
@@ -123,6 +124,7 @@ class WebController extends Controller {
                     }
                     if (!is_null($common->getParam('ingredient'))) {
                         $ingredients = $common->getParam('ingredient');
+                        $required = $common->getParam('ingredient_req');
                         $newIngredients = array('name'=>$common->getParam('ingredient_name'), 'desc'=>$common->getParam('ingredient_desc'));
                         if (is_array($ingredients)) {
                             foreach ($ingredients as $ingid=>$ingredient) {
@@ -141,7 +143,8 @@ class WebController extends Controller {
                                                     $data['tbl_ingredient_hooks']['rows'][] = array(
                                                         'fields'=>array(
                                                             'ingredient_id'=>&$data['response']['tbl_ingredient'][$i]['id'],
-                                                            'menu_id'=>&$data['response']['tbl_menu']['id']
+                                                            'menu_id'=>&$data['response']['tbl_menu']['id'],
+                                                            'required'=>(isset($required[$ingid])) ? $required[$ingid] : 0
                                                         )
                                                     );
                                                 }
@@ -152,7 +155,8 @@ class WebController extends Controller {
                                     $data['tbl_ingredient_hooks']['rows'][] = array(
                                         'fields'=>array(
                                             'ingredient_id'=>$ingid,
-                                            'menu_id'=>&$data['response']['tbl_menu']['id']
+                                            'menu_id'=>&$data['response']['tbl_menu']['id'],
+                                            'required'=>(isset($required[$ingid])) ? $required[$ingid] : 0
                                         )
                                     );
                                 }
@@ -161,6 +165,7 @@ class WebController extends Controller {
                     }
                     if (!is_null($common->getParam('category'))) {
                         $categories = $common->getParam('category');
+                        $primary = $common->getParam('category_pri');
                         $newCategories = array('name'=>$common->getParam('category_name'), 'desc'=>$common->getParam('category_desc'));
                         if (is_array($categories)) {
                             foreach ($categories as $catid=>$category) {
@@ -179,7 +184,8 @@ class WebController extends Controller {
                                                     $data['tbl_category_hooks']['rows'][] = array(
                                                         'fields'=>array(
                                                             'cat_id'=>&$data['response']['tbl_category'][$i]['id'],
-                                                            'menu_id'=>&$data['response']['tbl_menu']['id']
+                                                            'menu_id'=>&$data['response']['tbl_menu']['id'],
+                                                            'is_primary'=>(isset($primary[$catid])) ? $primary[$catid] : 0
                                                         )
                                                     );
                                                 }
@@ -190,7 +196,8 @@ class WebController extends Controller {
                                     $data['tbl_category_hooks']['rows'][] = array(
                                         'fields'=>array(
                                             'cat_id'=>$catid,
-                                            'menu_id'=>&$data['response']['tbl_menu']['id']
+                                            'menu_id'=>&$data['response']['tbl_menu']['id'],
+                                            'is_primary'=>(isset($primary[$catid])) ? $primary[$catid] : 0
                                         )
                                     );
                                 }
@@ -205,6 +212,7 @@ class WebController extends Controller {
                     }
                 }
                 $this->set('action', 'add');
+                $this->set('locationID', 0);
                 if ($id != 0) {
                     $this->set('action', 'edit');
                     $tbl = array(
@@ -215,7 +223,7 @@ class WebController extends Controller {
                     );
                     $cols = array(
                         'm'=>array('*'),
-                        'ch'=>array('cat_id')
+                        'ch'=>array('cat_id', 'is_primary')
                     );
                     $cond = array(
                         'm'=>array(
@@ -234,7 +242,7 @@ class WebController extends Controller {
                             'i'=>'tbl_ingredient_hooks'
                         );
                         $ingCols = array(
-                            'i'=>array('ingredient_id')
+                            'i'=>array('ingredient_id', 'required')
                         );
                         $ingCond = array(
                             'i'=>array(
@@ -255,16 +263,17 @@ class WebController extends Controller {
                                 $item['icon'] = $cat['icon'];
                                 $item['categories'] = array();
                             }
-                            $item['categories'][] = $cat['cat_id'];
+                            $item['categories'][$cat['cat_id']] = $cat['is_primary'];
                             
                         }
                         if ($ingredient[1] > 0) {
                             $item['ingredients'] = array();
                             foreach ($ingredient[0] as $ing) {
-                                $item['ingredients'][] = $ing['ingredient_id'];
+                                $item['ingredients'][$ing['ingredient_id']] = $ing['required'];
                             }
                         }
                         $this->set('info', $item);
+                        $this->set('locationID', $data[0][0]['location_id']);
                     }
                     $this->set('id', $id);
                 }
@@ -298,6 +307,18 @@ class WebController extends Controller {
                     }
                     if (!is_null($common->getParam('parent_id'))) {
                         $data['tbl_venue']['fields']['parent_id'] = $common->getParam('parent_id');
+                    }
+                    $file = $common->getParam('image', 'file');
+                    if (!empty($file['name'])) {
+                        require_once ROOT . DS . 'lib' . DS . 'files' . DS . '__init.php';
+                        $files = new files();
+                        if ($files->createImageResource($file['name'], $file['tmp_name'])) {
+                            $files->resizeImage(320, 140, 'crop');
+                            $files->saveImage(uploadDir.'venues'.DS.$file['name']);
+                            $data['tbl_venue']['fields']['image'] = 'http://bar.smgdev.co.uk/img/venues/'.$file['name'];
+                        } else {
+                            $err[] = 'An error occurred uploading the file';
+                        }
                     }
                     if (empty($err)) {
                         $this->set('data', \data\collection::buildQuery("INSERT", $data));
@@ -370,7 +391,7 @@ class WebController extends Controller {
                             include ROOT . DS . "lib" . DS . "phpqrcode" . DS . "qrlib.php";
                             $venueID = $db->dbResult($db->dbQuery("SELECT parent_id FROM tbl_venue WHERE id={$common->getParam('location_id')}"));
                             if ($venueID[1] > 0) {
-                                QRcode::png("{$venueID[0][0]['parent_id']}:{$common->getParam('location_id')}:{$return['returned']['tbl_table']['id']}", uploadDir."QR_code_".$return['returned']['tbl_table']['id'].".png", "H", 16, 2);
+                                QRcode::png("{$venueID[0][0]['parent_id']}:{$common->getParam('location_id')}:{$return['returned']['tbl_table']['id']}", uploadDir."items/QR_code_".$return['returned']['tbl_table']['id'].".png", "H", 16, 2);
                                 $db->dbQuery("UPDATE tbl_table SET QR_code='QR_code_".$return['returned']['tbl_table']['id'].".png' WHERE id={$return['returned']['tbl_table']['id']}");
                             }
                         }
@@ -410,6 +431,7 @@ class WebController extends Controller {
                 }
                 break;
             case "sponsor":
+                $this->set('id', 0);
                 if (!is_null($common->getParam('submitted'))) {
                     $data = array(
                         'response'=>array(
@@ -438,8 +460,8 @@ class WebController extends Controller {
                             $files = new files();
                             $file['name'] = time().'-'.$file['name'];
                             if ($files->createImageResource($file['name'], $file['tmp_name'])) {
-                                $files->resizeImage(640, 160, 'rectangle');
-                                $files->saveImage(uploadDir.$file['name'], 60);
+                                $files->resizeImage(450, 180, 'rectangle');
+                                $files->saveImage(uploadDir.'items'.DS.$file['name'], 60);
                                 $data['tbl_advert']['fields']['img'] = 'http://bar.smgdev.co.uk/img/items/'.$file['name'];
                             } else {
                                 $err[] = 'An error occurred uploading the file';
@@ -516,8 +538,8 @@ class WebController extends Controller {
                     );
                     $img = \data\collection::buildQuery("SELECT", $tbl, $joins, $cols, $cond);
                     if ($img[1] > 0) {
-                        if (!empty($img[0][0]['icon']) && file_exists(uploadDir.basename($img[0][0]['icon']))) {
-                            unlink(uploadDir.basename($img[0][0]['icon']));
+                        if (!empty($img[0][0]['icon']) && file_exists(uploadDir.'items'.DS.basename($img[0][0]['icon']))) {
+                            unlink(uploadDir.'items'.DS.basename($img[0][0]['icon']));
                         }
                         $del = array(
                             'tbl_menu'=>array('id'=>$id),
@@ -552,6 +574,7 @@ class WebController extends Controller {
     }
     public function orders($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -564,6 +587,7 @@ class WebController extends Controller {
     }
     public function menu($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -575,6 +599,7 @@ class WebController extends Controller {
     }
     public function venue($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -586,6 +611,7 @@ class WebController extends Controller {
     }
     public function location($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -597,6 +623,7 @@ class WebController extends Controller {
     }
     public function table($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -608,6 +635,7 @@ class WebController extends Controller {
     }
     public function sponsor($action='list') {
         global $common;
+        $this->level = 1;
         $this->isJSON = true;
         $this->_template->xhr = true;
         $common->isPage = false;
@@ -619,18 +647,20 @@ class WebController extends Controller {
     }
     public function downloader($url='', $name='') {
         global $common;
+        $this->level = 1;
+        $common->isPage = false;
         if (!empty($url)) {
             if (empty($name)) {
                 $name = $url;
             }
-            if (file_exists(uploadDir.DS.$url)) {
-                $img = file_get_contents(uploadDir.DS.$url);
+            if (file_exists(uploadDir.'items'.DS.$url)) {
+                $img = file_get_contents(uploadDir.'items'.DS.$url);
                 $finfo = new finfo();
                 header('Content-Description: File Transfer');
-                header("Content-Type: {$finfo->file(uploadDir.DS.$url, FILEINFO_MIME)}");
+                header("Content-Type: {$finfo->file(uploadDir.'items'.DS.$url, FILEINFO_MIME)}");
                 header("Content-disposition: attachment; filename= ".$common->safeFilename($name).".png");
                 header("Content-Transfer-Encoding: binary");
-                $fsize = filesize(uploadDir.DS.$url);
+                $fsize = filesize(uploadDir.'items'.DS.$url);
                 header("Content-Length: $fsize");
                 print($img);
             }
