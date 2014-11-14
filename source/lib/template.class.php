@@ -4,7 +4,7 @@
  * Bar App - 2014
  */
 class Template {
-    var $statuses = array('Order Placed', 'In Progress', 'Serving', 'Completed', 'Problem with Order');
+    var $statuses = array('Order Placed', 'In Progress', 'Serving', 'Served', 'Paid', 'Problem with Order');
     protected $variables = array();
     protected $_controller;
     protected $_action;
@@ -60,18 +60,6 @@ class Template {
         if (!empty($list)) {
             foreach ($list as $val=>$item) {
                 $output .= '<option value="'.$val.'" '.(($val == $sel) ? 'selected="selected"' : '').'>'.$item.'</option>';
-            }
-        }
-        return $output;
-    }
-    public function radioList($name='', $list=array(), $sel='') {
-        $output = '';
-        if (!empty($list)) {
-            $UID = uniqid('item_');
-            $i = 0;
-            foreach ($list as $val=>$item) {
-                $output .= '<label for="'.$UID.'_'.$i.'">'.$item.'</label><input name="'.$name.'" type="radio" id="'.$UID.'_'.$i.'" value="'.$val.'" '.(($val == $sel) ? 'checked="checked"' : '').' />';
-                $i++;
             }
         }
         return $output;

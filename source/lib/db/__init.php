@@ -55,7 +55,7 @@ class db {
         }
         if ($state != 'id') {
             return $mysqlQuery;
-        } else{
+        } else {
             return mysqli_insert_id($this->dbc);
         }
     }

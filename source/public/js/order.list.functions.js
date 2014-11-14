@@ -14,9 +14,13 @@ var Poll = function() {
                 var dataL = i.data.length;
                 if (isNaN(dataL)) {
                     for (var x in i.data) {
-                        $(".order_list tbody").prepend('<tr id="order_'+x+'" class="status_'+i.data[x].status+'"><td align="center" width="60" class="order_id">'+x+'</td><td align="center" width="100">'+i.data[x].table+'</td><td class="order_status_select"><input type="hidden" name="order_id" value="'+i.data[x].id+'" /><select name="order_status"></select></td><td>'+i.data[x].time_ordered+'</td><td align="center" width="150"><a href="/web/view/'+x+'" class="view_order_btn">View Order #'+x+'</a></td></tr>');
-                        $("select", "#order_"+x).append('<option value="0">Order Placed</option><option value="1">In Progress</option><option value="2" selected="selected">Serving</option><option value="3">Completed</option><option value="4">Problem with Order</option>');
-                        $("select", "#order_"+x).val(i.data[x].status);
+                        if ($("#order_"+x, ".order_list tbody").length === 0) {
+                            $(".order_list tbody").prepend('<tr id="order_'+x+'" class="status_'+i.data[x].status+'"><td align="center" width="60" class="order_id">'+x+'</td><td align="center" width="100">'+i.data[x].table+'</td><td class="order_status_select"><input type="hidden" name="order_id" value="'+i.data[x].id+'" /><select name="order_status"></select></td><td>'+i.data[x].time_ordered+'</td><td align="center" width="150"><a href="/web/view/'+x+'" class="view_order_btn">View Order #'+x+'</a></td></tr>');
+                            $("select", "#order_"+x).append('<option value="0">Order Placed</option><option value="1">In Progress</option><option value="2" selected="selected">Serving</option><option value="3">Served</option><option value="4">Paid</option><option value="5">Problem with Order</option>');
+                            $("select", "#order_"+x).val(i.data[x].status);
+                        } else if ($("select", "#order_"+x).val() !== i.data[x].status) {
+                            $("select", "#order_"+x).val(i.data[x].status);
+                        }
                     }
                 }
             }
